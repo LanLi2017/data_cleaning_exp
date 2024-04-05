@@ -1,0 +1,13 @@
+*.pdf
+*.png
+*.gv
+OpenRefineClientPy3/
+__pycache__/
+*_view_*
+*.json
+*.csv
+*.tar.gz
+.DS_Store
+yw.properties
+yesworkflow-*
+dataset_api.py
