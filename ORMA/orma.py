@@ -14,7 +14,7 @@ import json
 # from extra_info import generate_recipe as gen_recipe
 from graphviz import Digraph
 
-from extra_info import generate_recipe as gen_recipe
+from ORMA.extra_info import generate_recipe as gen_recipe
 # from extra_info import generate_recipe as gen_recipe
 # import all library needed for this class
 import re
@@ -1484,16 +1484,6 @@ def parallel_view_main(project_id, output_gv):
 
 # decomposition
 # serial - parallel
-def dfs(graph, u):
-    visited_nodes = [u]
-    try:
-        for v in graph[u]:
-            visited_nodes += dfs(graph, v)
-    except KeyError:
-        pass
-    return visited_nodes
-
-
 def write_linked_dep(edges):
     # this will return dictionary: {node: [dependent nodes]}
     # we only care the nodes with different name but linked together
@@ -1545,7 +1535,7 @@ def find_component(neighbors_of, u, component=None):
 
 
 def cluster_main(project_id):
-    json_data, schema_info, _ = gen_recipe(project_id)
+    json_data, schema_info = gen_recipe(project_id)
     schemas = get_schema_list(schema_info)
     orma_data = translate_operator_json_to_graph(json_data, schemas)
     new_edges = []
