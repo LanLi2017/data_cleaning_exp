@@ -189,11 +189,13 @@ def merge_basename(operator):
                 newm.append(col[1:len(col) - 1])
             result = newm
             return result
-        elif re.findall('[A-Z]\w+ \d', exp):
-            result = re.findall('[A-Z]\w+ \d', exp)
+        elif re.findall(r"(?<=cells\[')([^']+)(?='\]\.value)", exp):
+            print(f'yes? {exp}')
+            result = re.findall(r"(?<=cells\[')([^']+)(?='\]\.value)", exp)
             newm = []
             for col in result:
                 newm.append(col)
+            print(newm)
             result = newm
             return result
         else:
