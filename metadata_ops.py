@@ -114,24 +114,37 @@ def meta_extract(r1):
             }
             rename_cols.append(rename_col)
         # elif op_name == ""
-
-    print(transforms)
     return transforms
 
 
-def main():
-    project_id = 2221256614441
+def exe_enhanced_recipe(project_id, fname):
     oprefine = refine.RefineProject(refine.RefineServer(), project_id)
-    
     enhanced_recipe, schema_info = aug_recipe(project_id)
     last_id = enhanced_recipe[-1]['id']
     for step_id, op in enumerate(enhanced_recipe):
         prev_id = enhanced_recipe[step_id-1]['id']
         spe_cases = special_handling(op, prev_id, last_id, oprefine)
-        if isinstance(spe_cases, dict):
+        if spe_cases:
             op.update(spe_cases)
-    with open("recipes/enhanced_orma/citation_A.json", 'w')as f_A:
-        json.dump(enhanced_recipe, f_A, indent=4)
+    with open(fname, 'w')as fp:
+        json.dump(enhanced_recipe, fp, indent=4)
+    return enhanced_recipe
+
+
+def detect_conflicts():
+    # if rowid/column name overlap (at least one of them)
+    # check the other key parameters..
+    # return the data cleaning steps
+    pass 
+
+
+def main():
+    project_id_Alice = 2221256614441
+    project_id_Bob = 1883828664735
+    
+    # add information to the old recipe:
+    er1 = exe_enhanced_recipe(project_id_Alice, "recipes/enhanced_orma/alice.json")
+    er2 = exe_enhanced_recipe(project_id_Bob, "recipes/enhanced_orma/bob.json")
 
     # f1 = 'recipes/usecase1.json'
     # with open(f1, 'r') as fp:
