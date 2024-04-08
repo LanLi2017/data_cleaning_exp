@@ -1197,7 +1197,7 @@ def table_view(project_id, combined=False):
                     ]
 
             elif operator['op'] == 'core/row-removal':
-                colname = f'col-name "{operator["engineConfig"]["facets"][0]["columnName"]}"'
+                # colname = f'col-name "{operator["engineConfig"]["facets"][0]["columnName"]}"'
                 expression = f'expression "{operator["engineConfig"]["facets"][0]["expression"].split(":")[-1]}"'
 
                 graph.process = [f'({i}) row-removal']
@@ -1212,7 +1212,7 @@ def table_view(project_id, combined=False):
                 else:
                     graph.in_node_names += [
                         prev_table,
-                        colname,
+                        # colname,
                         expression
                     ]
                     graph.out_node_names += [
