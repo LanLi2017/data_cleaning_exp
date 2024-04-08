@@ -345,15 +345,16 @@ def translate_operator_json_to_graph(json_data, schemas):
                 ]
 
             elif operator['op'] == 'core/row-removal':
-                graph.process = [f'({i}) row-removal']
-                cur_node = operator['engineConfig']['facets'][0]['name']
-                new_node = operator['engineConfig']['facets'][0]['name']
-                graph.in_node_names += [
-                    {'col_name': cur_node, 'label': f'{get_column_current_node(cur_node)}'}
-                ]
-                graph.out_node_names += [
-                    {'col_name': new_node, 'label': f'{create_new_node_of_column(new_node)}', 'color': _color_}
-                ]
+                pass
+                # graph.process = [f'({i}) row-removal']
+                # cur_node = operator['engineConfig']['facets'][0]['name']
+                # new_node = operator['engineConfig']['facets'][0]['name']
+                # graph.in_node_names += [
+                #     {'col_name': cur_node, 'label': f'{get_column_current_node(cur_node)}'}
+                # ]
+                # graph.out_node_names += [
+                #     {'col_name': new_node, 'label': f'{create_new_node_of_column(new_node)}', 'color': _color_}
+                # ]
 
             elif operator['op'] == 'core/column-move':
                 index = operator['index']
