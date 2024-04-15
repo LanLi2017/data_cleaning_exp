@@ -190,12 +190,10 @@ def merge_basename(operator):
             result = newm
             return result
         elif re.findall(r"(?<=cells\[')([^']+)(?='\]\.value)", exp):
-            print(f'yes? {exp}')
             result = re.findall(r"(?<=cells\[')([^']+)(?='\]\.value)", exp)
             newm = []
             for col in result:
                 newm.append(col)
-            print(newm)
             result = newm
             return result
         else:
@@ -205,8 +203,6 @@ def merge_basename(operator):
 # TASK 1: Create a modular_views of data cleaning workflow
 # column-dependency view
 def translate_operator_json_to_graph(json_data, schemas):
-    # json_data, schema_info = gen_recipe(project_id)
-    # schemas = get_schema_list(schema_info)
     orma_data = []
     nodes_num_about_column = Counter()
 
@@ -379,7 +375,23 @@ def translate_operator_json_to_graph(json_data, schemas):
                      'color': _custome_v_color}
                 ]
             # TODO
-            # reconciliation
+            # single-edit
+            #  "op": "single_cell_edit",
+            # "row": "3",
+            # "columnName": "Author"
+            elif operator['op'] == 'single_cell_edit':
+                column_name = operator['columnName']
+                desc = operator['description']
+                row_number = operator['row']
+                process = f'single_cell_edit row #{row_number}'
+                graph.process = [f'({i}) {process}']
+                graph.in_node_names += [
+                    {'col_name': column_name, 'label': f'{get_column_current_node(column_name)}'}
+                ]
+                graph.out_node_names += [
+                    {'col_name': column_name, 'label': f'{create_new_node_of_column(column_name)}',
+                     'color': _custome_v_color}
+                ]
             elif operator['op'] == 'core/recon':
                 graph.process = [f'({i}) reconciliation']
                 column_name = operator['columnName']
@@ -546,8 +558,6 @@ def process_feature_orma(orma_data, orma_dot):
 
 def generate_dot(json_data, schemas, output):
     # default feature setting for data node
-    # json_data, schema_info = gen_recipe(project_id)
-    # schemas = get_schema_list(schema_info)
     orma_data = translate_operator_json_to_graph(json_data, schemas)
     feature_data = {'shape': 'box', 'style': 'rounded,filled', 'fillcolor': '#FFFFCC', 'peripheries': 1,
                     'fontname': "Helvetica-BoldOblique"}
@@ -629,10 +639,10 @@ def generate_dot(json_data, schemas, output):
 
 
 # TASK 2; Create a summary view of data cleaning workflow
-def schema_analysis(recipe, schema_info):
+def schema_analysis(json_data, schema_info):
     edges = []
     # analyze schema change and define the edges
-    for i, operator in enumerate(recipe, start=1):
+    for i, operator in enumerate(json_data, start=1):
         if 'op' in [*operator]:
             if operator['op'] == 'core/column-addition':  # merge operation
                 basename = merge_basename(operator)
@@ -952,7 +962,7 @@ def color_ports(schema, color_idx: list, color_type: dict):
     return res
 
 
-def draw_schema_evolution(recipe, schemas, output):
+def draw_schema_evolution(json_data, schemas, output):
     # use Data structure from graphviz
     feature_data = {'shape': 'box', 'style': 'rounded,filled', 'fillcolor': '#FAFAF0',
                     'fontname': "Symbol", 'fontsize': "12"}  # should be string!!!
@@ -967,7 +977,7 @@ def draw_schema_evolution(recipe, schemas, output):
 
     # [[{'schema0': 'date'}, {'schema1': 'date 2'}],...]
     # [from, to]
-    edges = schema_analysis(recipe, schemas)
+    edges = schema_analysis(json_data, schemas)
 
     for i, schema in enumerate(schemas):
         node_name = f'schema{i}'
@@ -1011,18 +1021,15 @@ def draw_schema_evolution(recipe, schemas, output):
     return schema_graph
 
 
-def model_schema_evolution(project_id, output_gv):
-    # project_id = 2124203262743  # 2486157629041
-    recipe, schema_info, _ = gen_recipe(project_id)
+def model_schema_evolution(json_data, schema_info, output_gv):
     schemas = get_schema_list(schema_info)
     # output_gv = 'output/schema_evo.gv'
-    schema_graph = draw_schema_evolution(recipe, schemas, output_gv)
+    schema_graph = draw_schema_evolution(json_data, schemas, output_gv)
     schema_graph.view()
 
 
 # TASK 3: Create a table_view of data cleaing workflow
-def table_view(project_id, combined=False):
-    json_data, schema_info, _ = gen_recipe(project_id)
+def table_view(json_data, combined=False):
     table_view_data = []
     for i, operator in enumerate(json_data, start=1):
         graph = ORMAGraph()  # graph includes nodes and edges
@@ -1424,10 +1431,10 @@ def get_node_from_table_view(orma_data):
     return data_nodes, params_nodes
 
 
-def generate_table_dot(project_id=2124203262743, output='output/table_view.gv', combined=False):
+def generate_table_dot(json_data, output='output/table_view.gv', combined=False):
     # data node: #FFFFCC
     # process: #CCFFCC
-    table_view_data = table_view(project_id, combined)
+    table_view_data = table_view(json_data, combined)
     feature_data = {'shape': 'box', 'style': 'rounded,filled', 'fillcolor': _color_, 'peripheries': '1',
                     'fontname': 'Helvetica'}
     tableview_dot = Digraph('ORMA-Table-View', filename=output)
@@ -1471,15 +1478,11 @@ def generate_table_dot(project_id=2124203262743, output='output/table_view.gv', 
     return tableview_dot
 
 
-def parallel_view_main(project_id, output_gv):
+def parallel_view_main(json_data, schema_info, output_gv):
     '''Run parallel view'''
-    # input project_id to gen()
-    # project_id = 2124203262743
-
     # TODO
     # facet edge rendering
     # output_gv = 'output/parallel_view.gv'
-    json_data, schema_info, _ = gen_recipe(project_id)
     schemas = get_schema_list(schema_info)
     orma_g = generate_dot(json_data, schemas, output_gv)
     orma_g.view()
@@ -1537,8 +1540,7 @@ def find_component(neighbors_of, u, component=None):
     return component
 
 
-def cluster_main(project_id):
-    json_data, schema_info = gen_recipe(project_id)
+def cluster_main(json_data, schema_info):
     schemas = get_schema_list(schema_info)
     orma_data = translate_operator_json_to_graph(json_data, schemas)
     new_edges = []
@@ -1559,12 +1561,10 @@ def cluster_main(project_id):
     return components
 
 
-def split_recipe(project_id=2124203262743, output_gv='modular_views/module_view'):
+def split_recipe(json_data, schema_info, output_gv='modular_views/module_view'):
     # how to define subworkflow:
     # same input or same output
-    components = cluster_main(project_id)
-
-    json_data, schema_info, _ = gen_recipe(project_id)
+    components = cluster_main(json_data, schema_info)
     schemas = get_schema_list(schema_info)
     orma_data = translate_operator_json_to_graph(json_data, schemas)
 
@@ -1614,38 +1614,40 @@ class ORMA:
         pass
 
     @staticmethod
-    def generate_table_view(project_id, output, combined=False):
-        generate_table_dot(project_id, output, combined)
+    def generate_table_view(json_data, output, combined):
+        generate_table_dot(json_data, output, combined)
 
     @staticmethod
-    def generate_parallel_view(project_id, output_gv):
-        parallel_view_main(project_id, output_gv)
+    def generate_parallel_view(json_data, schema_info, output_gv):
+        parallel_view_main(json_data, schema_info, output_gv)
 
     @staticmethod
-    def generate_schema_view(project_id, output_gv):
-        model_schema_evolution(project_id=project_id, output_gv=output_gv)
+    def generate_schema_view(json_data, schema_info, output_gv):
+        model_schema_evolution(json_data, schema_info, output_gv=output_gv)
 
     @staticmethod
-    def generate_module_views(project_id, output_gv):
-        split_recipe(project_id=project_id, output_gv=output_gv)
+    def generate_module_views(json_data, schema_info, output_gv):
+        split_recipe(json_data, schema_info, output_gv=output_gv)
 
 
 class ORMAProcessor:
     def __init__(self):
         pass
 
-    def generate_views(self, project_id, output, type="table_view", combined=False, **kwargs):
+    def generate_views(self, output, project_id=None, type="table_view", **kwargs):
+        if project_id:
+            json_data, schema_info = gen_recipe(project_id)
+        else:
+            json_data, schema_info = kwargs['json_data'], kwargs['schema_info']
         if type == "table_view":
-            if combined:
-                return ORMA.generate_table_view(project_id, output, combined)
-            else:
-                return ORMA.generate_table_view(project_id, output, **kwargs)
+            combined = kwargs['combined']
+            ORMA.generate_table_view(json_data, output, combined)
         elif type == "schema_view":
-            return ORMA.generate_schema_view(project_id, output)
+            return ORMA.generate_schema_view(json_data, schema_info, output)
         elif type == "parallel_view":
-            return ORMA.generate_parallel_view(project_id, output)
+            return ORMA.generate_parallel_view(json_data, schema_info, output)
         elif type == 'modular_views':
-            return ORMA.generate_module_views(project_id, output)
+            return ORMA.generate_module_views(json_data, schema_info, output)
         else:
             raise BaseException("Workflow type Only Serial, Parallel or Merge")
 
@@ -1663,7 +1665,7 @@ def main():
     parser.add_argument(
         "--project_id",
         type=int,
-        default=1880722204439,
+        default=None,
         help='Input Project ID'
     )
     parser.add_argument(
@@ -1674,6 +1676,25 @@ def main():
     )
     parser.add_argument(
         'command', choices=FUNCTION_MAP.keys()
+    )
+    parser.add_argument(
+        "--combined",
+        type=bool,
+        default=False,
+        help='Only input when you choose Table view. [with/without Parameters] Default: False'
+    )
+
+    parser.add_argument(
+        "--json_data",
+        type=list,
+        default=None,
+        help='recipe JSON data[required]: orma on existing enhanced recipe'
+    )
+    parser.add_argument(
+        "--schema_info",
+        type=list,
+        default=None,
+        help='schema info [required]:orma on existing enhanced recipe'
     )
 
     args = parser.parse_args()

@@ -13,6 +13,7 @@ from ORMA.OpenRefineClientPy3.google_refine.refine import refine
 # from ORMA.OpenRefineClientPy3.google_refine.refine.refine import RowsResponseFactory
 
 from ORMA.extra_info import generate_recipe
+from ORMA.orma import ORMAProcessor, cluster_main, merge_basename
 
 
 def aug_recipe(project_id):
@@ -62,7 +63,7 @@ def special_handling(op: dict, prev_id, last_id, oprefine):
         row_index = desc_list[row_id].replace(',', '')
         column_id = right + 1
         column_name = " ".join(desc_list[column_id:])
-        return {"op": "single_cell_edit", "row": row_index, "column": column_name}
+        return {"op": "single_cell_edit", "row": row_index, "columnName": column_name}
     elif "op" in op:
         if op["op"] == "core/row-removal":
             h_id = op['id']
@@ -76,45 +77,30 @@ def special_handling(op: dict, prev_id, last_id, oprefine):
         return False
 
 
-def meta_extract(r1):
-    transforms = []
-    cell_edits = []
-    del_rows = []
-    del_cols = []
-    split_cols = []
-    join_cols = []
-    rename_cols = []
-
-    for state_id, ops in enumerate(r1):
-        op_name = ops['op']
-        if op_name == "core/text-transform":
-            col_name = ops['columnName']
-            func = ops['expression']
-            transform = {
-                        "state_id": state_id,
-                        "col_name": col_name,
-                        "function": func}
-            transforms.append(transform)
-        elif op_name == "core/column-split":
-            col_name = ops['columnName']
-            separator = ops['separator']
-            split_col = {
-                "state_id": state_id,
-                "col_name": col_name,
-                "sepator": separator
-            }
-            split_cols.append(split_col)
-        elif op_name == "core/column-rename":
-            col_name = ops['oldColumnName']
-            new_name = ops['newColumnName']
-            rename_col = {
-                "state_id": state_id,
-                "old_name": col_name,
-                "new_name": new_name
-            }
-            rename_cols.append(rename_col)
-        # elif op_name == ""
-    return transforms
+def col_extract(recipe):
+    cols = []
+    for state_id, ops in enumerate(recipe):
+        col_dict = {}
+        if 'op' in [*ops]:
+            op_name = ops['op']
+            if op_name == "core/column-addition":
+                col_name = merge_basename(ops) # it could be a list or a string 
+                if isinstance(col_name, list):
+                    col_dict = {col:state_id for col in col_name}
+                else:
+                    col_dict = {col_name: state_id}
+            elif op_name == "core/column-rename":
+                col_name = ops['oldColumnName']
+                col_dict = {col_name: state_id}
+            else:
+                try:
+                    col_name = ops['columnName']
+                    col_dict = {col_name: state_id}
+                except:
+                    pass
+        if col_dict:
+            cols.append(col_dict)
+    return cols
 
 
 def exe_enhanced_recipe(project_id, fname):
@@ -128,7 +114,18 @@ def exe_enhanced_recipe(project_id, fname):
             op.update(spe_cases)
     with open(fname, 'w')as fp:
         json.dump(enhanced_recipe, fp, indent=4)
-    return enhanced_recipe
+    return enhanced_recipe, schema_info
+
+
+# Detect linked nodes
+def dfs(graph, u):
+    visited_nodes = [u]
+    try:
+        for v in graph[u]:
+            visited_nodes += dfs(graph, v)
+    except KeyError:
+        pass
+    return visited_nodes
 
 
 def detect_conflicts():
@@ -143,14 +140,41 @@ def main():
     project_id_Bob = 1883828664735
     
     # add information to the old recipe:
-    er1 = exe_enhanced_recipe(project_id_Alice, "recipes/enhanced_orma/alice.json")
-    er2 = exe_enhanced_recipe(project_id_Bob, "recipes/enhanced_orma/bob.json")
+    er1, schema_info_1 = exe_enhanced_recipe(project_id_Alice, "recipes/enhanced_orma/alice.json")
+    er2, schema_info_2 = exe_enhanced_recipe(project_id_Bob, "recipes/enhanced_orma/bob.json")
 
     # f1 = 'recipes/usecase1.json'
     # with open(f1, 'r') as fp:
     #     r1 = json.load(fp)
     # list_ops_r1 = meta_extract(r1)
 
+def test_():
+    recipe, schema_info = exe_enhanced_recipe(2221256614441, "recipes/enhanced_orma/alice.json")
+
+    orma_proc = ORMAProcessor()
+    # (self, project_id, output, type="table_view", combined=False, **kwargs):
+    orma_proc.generate_views(output="ORMA_Output/alice_parallel.png", type= 'parallel_view',
+                             json_data=recipe, schema_info=schema_info)
+    # cols = col_extract(recipe) # [{'Book Title': 0}, {''}]
+    # print(cols)
+    
+    # column_ids: dict[str, set[int]] = {}
+    # for arrangement in cols:
+    #     for col, col_id in arrangement.items():
+    #         column_ids.setdefault(col, set()).add(col_id)
+    
+    # result = []
+    # query = cluster_main(2221256614441)
+    # for columns in query:
+    #     ids = set()
+    #     for col in columns:
+    #         ids.update(column_ids.get(col, set()))
+    #     result.append(ids)
+    
+    # pprint(result)
+    
+
 
 if __name__ == '__main__':
-    main()
+    test_()
+    # main()
