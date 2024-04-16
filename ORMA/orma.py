@@ -351,8 +351,8 @@ def translate_operator_json_to_graph(json_data, schemas):
                 for col in cur_schema:
                     graph.in_node_names += [
                         {'col_name': col, 'label': f'{get_column_current_node(col)}'}  # column name: label[unique]
-                    ]
-                    graph.process.append([f'({i}) row-removal: {col}']) 
+                    ] 
+                    graph.process.append([f'({i}) row-removal {col}']) 
                     graph.out_node_names += [
                          {'col_name': col, 'label': f'{create_new_node_of_column(col)}', 'color': _color_}
                     ]
@@ -479,17 +479,20 @@ def translate_operator_json_to_graph(json_data, schemas):
                 pass
         
         if len(graph.process) == 1:
+            print(f'check input node: {graph.in_node_names}')
             graph.edge += [{'from': graph.in_node_names, 'to': graph.process},
                         {'from': graph.process, 'to': graph.out_node_names}]
             orma_data.append(graph)
         elif len(graph.process) > 1:
             processes = graph.process
-            print(f'current processes: {processes}')
-            print(f'current in node names: {graph.in_node_names}')
+            print(graph.in_node_names)
+            # print(f'current processes: {processes}')
+            # print(f'current in node names: {graph.in_node_names}')
             for sub_id, sub_process in enumerate(processes):
+                print(f'check input node: {graph.in_node_names[sub_id]}')
                 graph.edge += [
-                    {'from': graph.in_node_names[sub_id], 'to': sub_process},
-                    {'from': sub_process, 'to': graph.out_node_names[sub_id]}
+                    {'from': [graph.in_node_names[sub_id]], 'to': sub_process},
+                    {'from': sub_process, 'to': [graph.out_node_names[sub_id]]}
                 ]
             orma_data.append(graph)
         
@@ -597,9 +600,10 @@ def generate_dot(json_data, schemas, output):
 
     res_edges = []
     for edge in edges:
-        print(f'------{edge}--------')
         from_node = edge['from']
         to_node = edge['to']
+        print(f'from: {from_node}')
+        print(f'to: {to_node}')
         if len(from_node) == 1 and len(to_node) == 1:
             res_edges.append({
                 'from': from_node[0],

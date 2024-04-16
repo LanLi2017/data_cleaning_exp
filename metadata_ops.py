@@ -159,7 +159,6 @@ def test_():
     # for data in orma_data:
     #     print(data.process)
     #     print(data.in_node_names)
-    print(schema_info)
     orma_proc.generate_views(output="ORMA_Output/test_rremoval.png", type= 'parallel_view',
                              json_data=recipe, schema_info=schema_info)
     cols = col_extract(recipe) # [{'Book Title': 0}, {''}]
