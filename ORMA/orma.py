@@ -343,17 +343,22 @@ def translate_operator_json_to_graph(json_data, schemas):
                 ]
 
             elif operator['op'] == 'core/row-removal':
-                pass
+                # row-level manipulation: 
+                # The input should be the current column schema 
+                # The output should be all the updated versions of columns
                 # graph.process = [f'({i}) row-removal']
-                # cur_node = operator['engineConfig']['facets'][0]['name']
-                # new_node = operator['engineConfig']['facets'][0]['name']
-                # graph.in_node_names += [
-                #     {'col_name': cur_node, 'label': f'{get_column_current_node(cur_node)}'}
-                # ]
-                # graph.out_node_names += [
-                #     {'col_name': new_node, 'label': f'{create_new_node_of_column(new_node)}', 'color': _color_}
-                # ]
-
+                cur_schema = schemas[i]
+                for col in cur_schema:
+                    graph.in_node_names += [
+                        {'col_name': col, 'label': f'{get_column_current_node(col)}'}  # column name: label[unique]
+                    ]
+                    graph.process.append([f'({i}) row-removal: {col}']) 
+                    graph.out_node_names += [
+                         {'col_name': col, 'label': f'{create_new_node_of_column(col)}', 'color': _color_}
+                    ]
+                    # print(f"current operation is {sub_graph.process}")
+                    # print(sub_graph.in_node_names)
+                    # print(sub_graph.out_node_names)
             elif operator['op'] == 'core/column-move':
                 index = operator['index']
                 graph.process = [f'({i}) Move_to #{index}']
@@ -374,11 +379,6 @@ def translate_operator_json_to_graph(json_data, schemas):
                     {'col_name': column_name, 'label': f'{create_new_node_of_column(column_name)}',
                      'color': _custome_v_color}
                 ]
-            # TODO
-            # single-edit
-            #  "op": "single_cell_edit",
-            # "row": "3",
-            # "columnName": "Author"
             elif operator['op'] == 'single_cell_edit':
                 column_name = operator['columnName']
                 desc = operator['description']
@@ -477,10 +477,22 @@ def translate_operator_json_to_graph(json_data, schemas):
                 ]
             else:
                 pass
-        graph.edge += [{'from': graph.in_node_names, 'to': graph.process},
-                       {'from': graph.process, 'to': graph.out_node_names}]
-
-        orma_data.append(graph)
+        
+        if len(graph.process) == 1:
+            graph.edge += [{'from': graph.in_node_names, 'to': graph.process},
+                        {'from': graph.process, 'to': graph.out_node_names}]
+            orma_data.append(graph)
+        elif len(graph.process) > 1:
+            processes = graph.process
+            print(f'current processes: {processes}')
+            print(f'current in node names: {graph.in_node_names}')
+            for sub_id, sub_process in enumerate(processes):
+                graph.edge += [
+                    {'from': graph.in_node_names[sub_id], 'to': sub_process},
+                    {'from': sub_process, 'to': graph.out_node_names[sub_id]}
+                ]
+            orma_data.append(graph)
+        
     return orma_data
 
 
@@ -549,10 +561,18 @@ def process_feature_orma(orma_data, orma_dot):
         if not graph.process:
             pass
         else:
-            process_node = graph.process[0]
-            orma_dot.attr('node', shape=feature['shape'], style=feature['style'], fillcolor=feature['color'],
-                          peripheries=feature['peripheries'], fontname=feature['fontname'])
-            orma_dot.node(process_node)
+            if len(graph.process) == 1:
+                process_node = graph.process[0]
+                orma_dot.attr('node', shape=feature['shape'], style=feature['style'], fillcolor=feature['color'],
+                            peripheries=feature['peripheries'], fontname=feature['fontname'])
+                orma_dot.node(process_node)
+            else:
+                # [[],...]
+                for sub_process in graph.process:
+                    process_node = sub_process[0]
+                    orma_dot.attr('node', shape=feature['shape'], style=feature['style'], fillcolor=feature['color'],
+                                peripheries=feature['peripheries'], fontname=feature['fontname'])
+                    orma_dot.node(process_node)
     return orma_dot
 
 
@@ -577,6 +597,7 @@ def generate_dot(json_data, schemas, output):
 
     res_edges = []
     for edge in edges:
+        print(f'------{edge}--------')
         from_node = edge['from']
         to_node = edge['to']
         if len(from_node) == 1 and len(to_node) == 1:

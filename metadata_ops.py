@@ -13,7 +13,7 @@ from ORMA.OpenRefineClientPy3.google_refine.refine import refine
 # from ORMA.OpenRefineClientPy3.google_refine.refine.refine import RowsResponseFactory
 
 from ORMA.extra_info import generate_recipe
-from ORMA.orma import ORMAProcessor, cluster_main, merge_basename
+from ORMA.orma import ORMAProcessor, cluster_main, get_schema_list, merge_basename, translate_operator_json_to_graph
 
 
 def aug_recipe(project_id):
@@ -92,6 +92,8 @@ def col_extract(recipe):
             elif op_name == "core/column-rename":
                 col_name = ops['oldColumnName']
                 col_dict = {col_name: state_id}
+            # elif op_name == "single_cell_edit":
+            #     col_name = 
             else:
                 try:
                     col_name = ops['columnName']
@@ -149,14 +151,18 @@ def main():
     # list_ops_r1 = meta_extract(r1)
 
 def test_():
-    recipe, schema_info = exe_enhanced_recipe(2221256614441, "recipes/enhanced_orma/alice.json")
-
+    recipe, schema_info = exe_enhanced_recipe(1720089821831, "recipes/enhanced_orma/test_rremoval.json")
+    
+    # schemas = get_schema_list(schema_info)
     orma_proc = ORMAProcessor()
-    # (self, project_id, output, type="table_view", combined=False, **kwargs):
-    orma_proc.generate_views(output="ORMA_Output/alice_parallel.png", type= 'parallel_view',
+    # orma_data = translate_operator_json_to_graph(recipe, schemas)
+    # for data in orma_data:
+    #     print(data.process)
+    #     print(data.in_node_names)
+    print(schema_info)
+    orma_proc.generate_views(output="ORMA_Output/test_rremoval.png", type= 'parallel_view',
                              json_data=recipe, schema_info=schema_info)
-    # cols = col_extract(recipe) # [{'Book Title': 0}, {''}]
-    # print(cols)
+    cols = col_extract(recipe) # [{'Book Title': 0}, {''}]
     
     # column_ids: dict[str, set[int]] = {}
     # for arrangement in cols:
