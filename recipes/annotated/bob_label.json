@@ -1,0 +1,154 @@
+[
+    {
+        "op": "core/column-rename",
+        "oldColumnName": "Book Title",
+        "newColumnName": "Title",
+        "description": "Rename column Book Title to Title",
+        "id": 1707158269429,
+        "time": "2024-02-05T18:35:09Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Date"
+        ],
+        "reason": "old column name is not precise",
+        "clean_type": 0
+    },
+    {
+        "op": "core/text-transform",
+        "engineConfig": {
+            "facets": [],
+            "mode": "row-based"
+        },
+        "columnName": "Date",
+        "expression": "value.trim()",
+        "onError": "keep-original",
+        "repeat": false,
+        "repeatCount": 10,
+        "description": "Text transform on 4 cells in column Date: value.trim()",
+        "id": 1707158892558,
+        "time": "2024-02-05T18:35:22Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Date"
+        ],
+        "reason": "Format data on column Date",
+        "clean_type": 1
+    },
+    {
+        "description": "Edit single cell on row 4, column Author",
+        "id": 1707158638258,
+        "time": "2024-02-05T18:36:11Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Date"
+        ],
+        "op": "single_cell_edit",
+        "row": "4",
+        "columnName": "Author",
+        "reason": "Data impute on column Author",
+        "clean_type": 2
+    },
+    {
+        "description": "Edit single cell on row 3, column Author",
+        "id": 1707158646230,
+        "time": "2024-02-05T18:36:18Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Date"
+        ],
+        "op": "single_cell_edit",
+        "row": "3",
+        "columnName": "Author",
+        "reason": "Format data on column Author",
+        "clean_type": 2
+    },
+    {
+        "op": "core/column-split",
+        "engineConfig": {
+            "facets": [],
+            "mode": "row-based"
+        },
+        "columnName": "Author",
+        "guessCellType": true,
+        "removeOriginalColumn": false,
+        "mode": "separator",
+        "separator": ",",
+        "regex": false,
+        "maxColumns": 0,
+        "description": "Split 4 cell(s) in column Author into several columns by separator",
+        "id": 1707158298149,
+        "time": "2024-02-05T18:36:32Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Author 1",
+            "Author 2",
+            "Date"
+        ],
+        "reason": "Feature Extraction",
+        "clean_type": 3
+    },
+    {
+        "op": "core/column-rename",
+        "oldColumnName": "Author 1",
+        "newColumnName": "Last Name",
+        "description": "Rename column Author 1 to Last Name",
+        "id": 1707158633219,
+        "time": "2024-02-05T18:36:41Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Last Name",
+            "Author 2",
+            "Date"
+        ],
+        "reason": "old column name is not precise",
+        "clean_type": 4
+    },
+    {
+        "op": "core/column-rename",
+        "oldColumnName": "Author 2",
+        "newColumnName": "First Name",
+        "description": "Rename column Author 2 to First Name",
+        "id": 1707158735548,
+        "time": "2024-02-05T18:36:49Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Last Name",
+            "First Name",
+            "Date"
+        ],
+        "reason": "old column name is not precise",
+        "clean_type": 5
+    },
+    {
+        "op": "core/column-addition",
+        "engineConfig": {
+            "facets": [],
+            "mode": "row-based"
+        },
+        "baseColumnName": "Date",
+        "expression": "join ([coalesce(cells['Last Name'].value,''),coalesce(cells['Date'].value,'')],',')",
+        "onError": "keep-original",
+        "newColumnName": "Citation",
+        "columnInsertIndex": 5,
+        "description": "Create new column Citation based on column Date by filling 4 rows with join ([coalesce(cells['Last Name'].value,''),coalesce(cells['Date'].value,'')],',')",
+        "id": 1707159206704,
+        "time": "2024-02-05T18:38:10Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Last Name",
+            "First Name",
+            "Date",
+            "Citation"
+        ],
+        "reason": "Create the target column",
+        "clean_type": 6
+    }
+]
