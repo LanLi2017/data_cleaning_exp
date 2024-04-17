@@ -343,10 +343,6 @@ def translate_operator_json_to_graph(json_data, schemas):
                 ]
 
             elif operator['op'] == 'core/row-removal':
-                # row-level manipulation: 
-                # The input should be the current column schema 
-                # The output should be all the updated versions of columns
-                # graph.process = [f'({i}) row-removal']
                 cur_schema = schemas[i]
                 for col in cur_schema:
                     graph.in_node_names += [
@@ -356,9 +352,6 @@ def translate_operator_json_to_graph(json_data, schemas):
                     graph.out_node_names += [
                          {'col_name': col, 'label': f'{create_new_node_of_column(col)}', 'color': _color_}
                     ]
-                    # print(f"current operation is {sub_graph.process}")
-                    # print(sub_graph.in_node_names)
-                    # print(sub_graph.out_node_names)
             elif operator['op'] == 'core/column-move':
                 index = operator['index']
                 graph.process = [f'({i}) Move_to #{index}']
@@ -456,7 +449,6 @@ def translate_operator_json_to_graph(json_data, schemas):
                             {'col_name': column_name, 'label': f'{create_new_node_of_column(column_name)}',
                              'color': _gen_val_color_}
                         ]
-                        pass
                 except KeyError:
                     continue
         else:
@@ -485,11 +477,7 @@ def translate_operator_json_to_graph(json_data, schemas):
             orma_data.append(graph)
         elif len(graph.process) > 1:
             processes = graph.process
-            print(graph.in_node_names)
-            # print(f'current processes: {processes}')
-            # print(f'current in node names: {graph.in_node_names}')
             for sub_id, sub_process in enumerate(processes):
-                print(f'check input node: {graph.in_node_names[sub_id]}')
                 graph.edge += [
                     {'from': [graph.in_node_names[sub_id]], 'to': sub_process},
                     {'from': sub_process, 'to': [graph.out_node_names[sub_id]]}
@@ -602,8 +590,6 @@ def generate_dot(json_data, schemas, output):
     for edge in edges:
         from_node = edge['from']
         to_node = edge['to']
-        print(f'from: {from_node}')
-        print(f'to: {to_node}')
         if len(from_node) == 1 and len(to_node) == 1:
             res_edges.append({
                 'from': from_node[0],
