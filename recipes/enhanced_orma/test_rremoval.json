@@ -1,0 +1,83 @@
+[
+    {
+        "op": "core/column-rename",
+        "oldColumnName": "Book Title",
+        "newColumnName": "Title",
+        "description": "Rename column Book Title to Title",
+        "id": 1713299881259,
+        "time": "2024-04-16T20:21:43Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Date"
+        ]
+    },
+    {
+        "description": "Star row 4",
+        "id": 1713299134590,
+        "time": "2024-04-16T20:21:46Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Date"
+        ]
+    },
+    {
+        "op": "core/row-removal",
+        "engineConfig": {
+            "facets": [
+                {
+                    "type": "list",
+                    "name": "Starred Rows",
+                    "expression": "row.starred",
+                    "columnName": "",
+                    "invert": false,
+                    "omitBlank": false,
+                    "omitError": false,
+                    "selection": [
+                        {
+                            "v": {
+                                "v": true,
+                                "l": "true"
+                            }
+                        }
+                    ],
+                    "selectBlank": false,
+                    "selectError": false
+                }
+            ],
+            "mode": "row-based"
+        },
+        "description": "Remove 1 rows",
+        "id": 1713299088093,
+        "time": "2024-04-16T20:22:01Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Date"
+        ],
+        "row_index": [
+            4
+        ]
+    },
+    {
+        "op": "core/text-transform",
+        "engineConfig": {
+            "facets": [],
+            "mode": "row-based"
+        },
+        "columnName": "Date",
+        "expression": "value.trim()",
+        "onError": "keep-original",
+        "repeat": false,
+        "repeatCount": 10,
+        "description": "Text transform on 1 cells in column Date: value.trim()",
+        "id": 1713299078016,
+        "time": "2024-04-16T20:22:09Z",
+        "schema": [
+            "Title",
+            "Author",
+            "Date"
+        ]
+    }
+]
