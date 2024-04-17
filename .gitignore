@@ -4,7 +4,6 @@
 OpenRefineClientPy3/
 __pycache__/
 *_view_*
-*.json
 *.csv
 *.tar.gz
 .DS_Store
