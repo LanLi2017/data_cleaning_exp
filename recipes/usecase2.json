@@ -1,0 +1,320 @@
+[
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "id",
+    "expression": "value.toNumber()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column id using expression value.toNumber()"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "name",
+    "expression": "grel:value.partition(/^(\\()/)[-1].partition(/(\\))$/)[0]",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column name using expression grel:value.partition(/^(\\()/)[-1].partition(/(\\))$/)[0]"
+  },
+  {
+    "op": "core/column-removal",
+    "columnName": "neighbourhood_group",
+    "description": "Remove column neighbourhood_group"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "minimum_nights",
+    "expression": "value.toNumber()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column minimum_nights using expression value.toNumber()"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "neighbourhood",
+          "expression": "value",
+          "columnName": "neighbourhood",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "L??p",
+                "l": "L??p"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "neighbourhood",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "L??p"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Loop"
+      }
+    ],
+    "description": "Mass edit cells in column neighbourhood"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "name",
+    "expression": "grel:value.replace('*','')",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column name using expression grel:value.replace('*','')"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "number_of_reviews",
+    "expression": "value.toNumber()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column number_of_reviews using expression value.toNumber()"
+  },
+  {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "baseColumnName": "number_of_reviews",
+    "expression": "grel:if(value>100,'high','low')",
+    "onError": "set-to-blank",
+    "newColumnName": "reviews_representation",
+    "columnInsertIndex": 11,
+    "description": "Create column reviews_representation at index 11 based on column number_of_reviews using expression grel:if(value>100,'high','low')"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "host_name",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "At Home Inn",
+          "At   Home Inn",
+          "At Home   Inn"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "At Home Inn"
+      },
+      {
+        "from": [
+          "E",
+          "E."
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "E"
+      },
+      {
+        "from": [
+          "K",
+          "K!"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "K"
+      },
+      {
+        "from": [
+          "Jose A.",
+          "Jose A"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Jose A."
+      },
+      {
+        "from": [
+          "Ren??e",
+          "Rene"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Ren??e"
+      },
+      {
+        "from": [
+          "De",
+          "De'"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "De"
+      },
+      {
+        "from": [
+          "J.R.",
+          "Jr"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "J.R."
+      },
+      {
+        "from": [
+          "CoCo",
+          "Coco"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "CoCo"
+      },
+      {
+        "from": [
+          "Joanne",
+          "JoAnne"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Joanne"
+      }
+    ],
+    "description": "Mass edit cells in column host_name"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "host_name",
+    "expression": "value.trim()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column host_name using expression value.trim()"
+  },
+  {
+    "op": "core/column-split",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "host_name",
+    "guessCellType": true,
+    "removeOriginalColumn": false,
+    "mode": "separator",
+    "separator": "\\s+And\\s+",
+    "regex": true,
+    "maxColumns": 0,
+    "description": "Split column host_name by separator"
+  },
+  {
+    "op": "core/column-rename",
+    "oldColumnName": "host_name 1",
+    "newColumnName": "First_host",
+    "description": "Rename column host_name 1 to First_host"
+  },
+  {
+    "op": "core/column-rename",
+    "oldColumnName": "host_name 2",
+    "newColumnName": "Second_host",
+    "description": "Rename column host_name 2 to Second_host"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "availability_365",
+    "expression": "value.toNumber()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column availability_365 using expression value.toNumber()"
+  },
+  {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "baseColumnName": "reviews_representation",
+    "expression": "grel:if(and(value=='high', cells.availability_365.value <100),'popular','other')",
+    "onError": "set-to-blank",
+    "newColumnName": "comment_hotel",
+    "columnInsertIndex": 14,
+    "description": "Create column comment_hotel at index 14 based on column reviews_representation using expression grel:if(and(value=='high', cells.availability_365.value <100),'popular','other')"
+  },
+  {
+    "op": "core/multivalued-cell-split",
+    "columnName": "name",
+    "keyColumnName": "id",
+    "mode": "separator",
+    "separator": "-",
+    "regex": false,
+    "description": "Split multi-valued cells in column name"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "last_review",
+    "expression": "value.toDate()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column last_review using expression value.toDate()"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "last_review",
+    "expression": "grel:value.split('T')[0]",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column last_review using expression grel:value.split('T')[0]"
+  }
+]

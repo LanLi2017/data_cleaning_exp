@@ -1,0 +1,1277 @@
+[
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "H-index",
+    "expression": "value.trim()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column H-index using expression value.trim()"
+  },
+  {
+    "op": "core/column-removal",
+    "columnName": "Column",
+    "description": "Remove column Column"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Name",
+    "expression": "grel:value.replace(/\\s+/, \" \")",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Name using expression grel:value.replace(/\\s+/, \" \")"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Name",
+    "expression": "grel:value.replace(',', ' ')",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Name using expression grel:value.replace(',', ' ')"
+  },
+  {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "baseColumnName": "Name",
+    "expression": "grel:if (value.match(/(.*)\\s?\\((.+)\\)/)!=null, value.match(/(.*)\\s?\\((.+)\\)/)[0], value)",
+    "onError": "set-to-blank",
+    "newColumnName": "Full Name",
+    "columnInsertIndex": 1,
+    "description": "Create column Full Name at index 1 based on column Name using expression grel:if (value.match(/(.*)\\s?\\((.+)\\)/)!=null, value.match(/(.*)\\s?\\((.+)\\)/)[0], value)"
+  },
+  {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "baseColumnName": "Name",
+    "expression": "grel:if (value.match(/(.*)\\s?\\((.+)\\)/)!=null, value.match(/(.*)\\s?\\((.+)\\)/)[1], \"\")",
+    "onError": "set-to-blank",
+    "newColumnName": "Other Title/Name",
+    "columnInsertIndex": 1,
+    "description": "Create column Other Title/Name at index 1 based on column Name using expression grel:if (value.match(/(.*)\\s?\\((.+)\\)/)!=null, value.match(/(.*)\\s?\\((.+)\\)/)[1], \"\")"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "Other Title/Name",
+          "expression": "value",
+          "columnName": "Other Title/Name",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "Full Name",
+          "expression": "value",
+          "columnName": "Full Name",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "Yong Zeng (曾勇）",
+                "l": "Yong Zeng (曾勇）"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "Starred Rows",
+          "expression": "row.starred",
+          "columnName": "",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": true,
+                "l": "true"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Full Name",
+    "expression": "grel:value.split('(')[0]",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Full Name using expression grel:value.split('(')[0]"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "Other Title/Name",
+          "expression": "value",
+          "columnName": "Other Title/Name",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "Full Name",
+          "expression": "value",
+          "columnName": "Full Name",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "Yong Zeng ",
+                "l": "Yong Zeng "
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Other Title/Name",
+    "expression": "grel:cells.Name.value.split('(')[1]",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Other Title/Name using expression grel:cells.Name.value.split('(')[1]"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "Other Title/Name",
+          "expression": "value",
+          "columnName": "Other Title/Name",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "Full Name",
+          "expression": "value",
+          "columnName": "Full Name",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "Jin Li 李进",
+                "l": "Jin Li 李进"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Other Title/Name",
+    "expression": "grel:cells.Name.value.split(' ')[-1]",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Other Title/Name using expression grel:cells.Name.value.split(' ')[-1]"
+  },
+  {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "baseColumnName": "Full Name",
+    "expression": "grel:length(value)",
+    "onError": "set-to-blank",
+    "newColumnName": "Len_FN",
+    "columnInsertIndex": 3,
+    "description": "Create column Len_FN at index 3 based on column Full Name using expression grel:length(value)"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Full Name",
+    "expression": "value.toTitlecase()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Full Name using expression value.toTitlecase()"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Full Name",
+    "expression": "value.trim()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Full Name using expression value.trim()"
+  },
+  {
+    "op": "core/multivalued-cell-split",
+    "columnName": "Area of Research",
+    "keyColumnName": "Name",
+    "mode": "separator",
+    "separator": "/",
+    "regex": false,
+    "description": "Split multi-valued cells in column Area of Research"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Artificial Intelligence",
+          "artificial intelligence",
+          "Artificial  intelligence"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Artificial Intelligence"
+      },
+      {
+        "from": [
+          "Machine Learning",
+          "machine learning",
+          "Machine learning"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Machine Learning"
+      },
+      {
+        "from": [
+          "Wireless Communications",
+          "Wireless communications",
+          "wireless communications"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Wireless Communications"
+      },
+      {
+        "from": [
+          "data mining",
+          "Data Mining",
+          "Data mining"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Data Mining"
+      },
+      {
+        "from": [
+          "Cloud Computing",
+          "Cloud computing",
+          "cloud computing"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Cloud Computing"
+      },
+      {
+        "from": [
+          "Evolutionary Computation",
+          "Evolutionary computation",
+          "evolutionary computation"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Evolutionary Computation"
+      },
+      {
+        "from": [
+          "Signal Processing",
+          "signal processing",
+          "Signal processing"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Signal Processing"
+      },
+      {
+        "from": [
+          "Computational Intelligence",
+          "computational intelligence",
+          "computational intelligence."
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Computational Intelligence"
+      },
+      {
+        "from": [
+          "Edge Computing",
+          "Edge computing",
+          "edge computing"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Edge Computing"
+      },
+      {
+        "from": [
+          "Statistical Signal Processing",
+          "statistical signal processing"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Statistical Signal Processing"
+      },
+      {
+        "from": [
+          "smart grid",
+          "Smart Grid"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Smart Grid"
+      },
+      {
+        "from": [
+          "Decision Analysis",
+          "Decision analysis"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Decision Analysis"
+      },
+      {
+        "from": [
+          "Communications",
+          "communications"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Communications"
+      },
+      {
+        "from": [
+          "Cyber-Physical Systems",
+          "cyber-physical systems"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Cyber-Physical Systems"
+      },
+      {
+        "from": [
+          "UAV communications",
+          "UAV Communications"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "UAV Communications"
+      },
+      {
+        "from": [
+          "Information Theory",
+          "information theory"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Information Theory"
+      },
+      {
+        "from": [
+          "Big data",
+          "big data"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Big Data"
+      },
+      {
+        "from": [
+          "Fuzzy Sets",
+          "Fuzzy sets"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Fuzzy Sets"
+      },
+      {
+        "from": [
+          "Neural Networks",
+          "neural networks"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Neural Networks"
+      },
+      {
+        "from": [
+          "Blockchain",
+          "blockchain"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Blockchain"
+      },
+      {
+        "from": [
+          "Deep Learning",
+          "deep learning"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Deep Learning"
+      },
+      {
+        "from": [
+          "6G Wireless Systems",
+          "6G wireless systems"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "6G Wireless Systems"
+      },
+      {
+        "from": [
+          "Time-delay Systems",
+          "time-delay systems"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Time-delay Systems"
+      },
+      {
+        "from": [
+          "Fuzzy decision making",
+          "fuzzy decision making"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Fuzzy Decision Making"
+      },
+      {
+        "from": [
+          "Metaheuristics",
+          "metaheuristics"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Metaheuristics"
+      },
+      {
+        "from": [
+          "computer vision",
+          "Computer Vision"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Computer Vision"
+      },
+      {
+        "from": [
+          "Multiple criteria decision making",
+          "multiple criteria decision making"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Multiple Criteria Decision Making"
+      },
+      {
+        "from": [
+          "Computing with words",
+          "computing with words"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Computing with Words"
+      },
+      {
+        "from": [
+          "Cognitive Radio",
+          "cognitive radio"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Cognitive Radio"
+      },
+      {
+        "from": [
+          "Information Fusion",
+          "information fusion"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Information Fusion"
+      },
+      {
+        "from": [
+          "Fuzzy Systems",
+          "fuzzy systems"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Fuzzy Systems"
+      },
+      {
+        "from": [
+          "Multi-Agent Systems",
+          "multi-agent systems"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Multi-Agent Systems"
+      },
+      {
+        "from": [
+          "Mobile Computing",
+          "Mobile computing"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Mobile Computing"
+      },
+      {
+        "from": [
+          "wireless communication",
+          "Wireless Communication"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Wireless Communication"
+      },
+      {
+        "from": [
+          "Swarm Intelligence",
+          "swarm intelligence"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Swarm Intelligence"
+      },
+      {
+        "from": [
+          "Wireless networking",
+          "Wireless Networking"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Wireless Networking"
+      },
+      {
+        "from": [
+          "Network Security",
+          "Network security"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Network Security"
+      },
+      {
+        "from": [
+          "Massive MIMO",
+          "massive MIMO"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Massive MIMO"
+      },
+      {
+        "from": [
+          "Decision Making",
+          "Decision making"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Decision Making"
+      },
+      {
+        "from": [
+          "Networked Control Systems",
+          "Networked control systems"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Networked Control Systems"
+      },
+      {
+        "from": [
+          "Complex Networks",
+          "Complex networks"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Complex Networks"
+      },
+      {
+        "from": [
+          "Security",
+          "security"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Security"
+      },
+      {
+        "from": [
+          "wireless networks",
+          "Wireless Networks"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Wireless Networks"
+      },
+      {
+        "from": [
+          "Wireless",
+          "wireless"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Wireless"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Cyber Security",
+          "Cybersecurity"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Cybersecurity"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Wireless Communications",
+          "Wireless Communication",
+          "Wireless communication networks"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Wireless Communications"
+      },
+      {
+        "from": [
+          "Systems and Control",
+          "systems and control theory"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Systems and Control"
+      },
+      {
+        "from": [
+          "Distributed System",
+          "Distributed Systems"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Distributed System"
+      },
+      {
+        "from": [
+          "Computational Intelligence",
+          "Computational Engineering"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Computational Engineering"
+      },
+      {
+        "from": [
+          "Wireless Networking",
+          "Wireless Networks"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Wireless Networking"
+      },
+      {
+        "from": [
+          "Neural Networks",
+          "Neural Networks(ANN)"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Neural Networks"
+      },
+      {
+        "from": [
+          "Evolutionary Algorithm",
+          "Evolutionary Algorithms"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Evolutionary Algorithm"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research"
+  },
+  {
+    "op": "core/multivalued-cell-join",
+    "columnName": "Area of Research",
+    "keyColumnName": "Name",
+    "separator": "/",
+    "description": "Join multi-valued cells in column Area of Research"
+  },
+  {
+    "op": "core/column-split",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research",
+    "guessCellType": true,
+    "removeOriginalColumn": false,
+    "mode": "separator",
+    "separator": "/",
+    "regex": false,
+    "maxColumns": 0,
+    "description": "Split column Area of Research by separator"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 1",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Machine Learning",
+          "Machine Learning(ML)"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Machine Learning"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research 1"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 1",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "B5G",
+          "Beyond 5G"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Beyond 5G"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research 1"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "Area of Research 2",
+          "expression": "value",
+          "columnName": "Area of Research 2",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "and",
+                "l": "and"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 2",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "and"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": ""
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research 2"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 1",
+    "expression": "jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Area of Research 1 using expression jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 2",
+    "expression": "jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Area of Research 2 using expression jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 4",
+    "expression": "jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Area of Research 4 using expression jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 5",
+    "expression": "jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Area of Research 5 using expression jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 6",
+    "expression": "jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Area of Research 6 using expression jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 7",
+    "expression": "jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Area of Research 7 using expression jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value"
+  },
+  {
+    "op": "core/column-rename",
+    "oldColumnName": "Area of Research",
+    "newColumnName": "Area of Research-old",
+    "description": "Rename column Area of Research to Area of Research-old"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "Area of Research",
+          "expression": "value",
+          "columnName": "Area of Research",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "Machine Learning for Communications",
+                "l": "Machine Learning for Communications"
+              }
+            },
+            {
+              "v": {
+                "v": "Machine Learning",
+                "l": "Machine Learning"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "record-based"
+    },
+    "columnName": "Area of Research 3",
+    "expression": "jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column Area of Research 3 using expression jython:import re\n\ndef capitalize_lower(match):\n    return match.group(1).capitalize()\n\npattern = re.compile(r'\\b([a-z]+)\\b')\n\nvalue = pattern.sub(capitalize_lower, value)\nreturn value"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 3",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Recommender System",
+          "Recommender Systems"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Recommender Systems"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research 3"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "Area of Research 4",
+          "expression": "value",
+          "columnName": "Area of Research 4",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "For",
+                "l": "For"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 4",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "For"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": ""
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research 4"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research 4",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Smart Grid",
+          "Smart Grids"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Smart Grids"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research 4"
+  },
+  {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "baseColumnName": "Area of Research 1",
+    "expression": "join ([cells['Area of Research 1'].value,cells['Area of Research 2'].value,cells['Area of Research 3'].value,cells['Area of Research 4'].value,cells['Area of Research 5'].value,cells['Area of Research 6'].value,cells['Area of Research 7'].value],'/')",
+    "onError": "keep-original",
+    "newColumnName": "Area of Research",
+    "columnInsertIndex": 13,
+    "description": "Create column Area of Research at index 13 based on column Area of Research 1 using expression join ([cells['Area of Research 1'].value,cells['Area of Research 2'].value,cells['Area of Research 3'].value,cells['Area of Research 4'].value,cells['Area of Research 5'].value,cells['Area of Research 6'].value,cells['Area of Research 7'].value],'/')"
+  },
+  {
+    "op": "core/multivalued-cell-split",
+    "columnName": "Area of Research",
+    "keyColumnName": "Name",
+    "mode": "separator",
+    "separator": "/",
+    "regex": false,
+    "description": "Split multi-valued cells in column Area of Research"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Radio Resource Allocation",
+          "Radio Resource Allocation And Opt"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Radio Resource Allocation"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Artificial Intelligence",
+          "Artifical Intelligence"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Artificial Intelligence"
+      },
+      {
+        "from": [
+          "Smart Grid",
+          "Smart Grids"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Smart Grids"
+      },
+      {
+        "from": [
+          "Deep Learning",
+          "Deep Learning Applications"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Deep Learning"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research"
+  },
+  {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "baseColumnName": "Area of Research",
+    "expression": "jython:return value",
+    "onError": "set-to-blank",
+    "newColumnName": "Area of Research-W",
+    "columnInsertIndex": 14,
+    "description": "Create column Area of Research-W at index 14 based on column Area of Research using expression jython:return value"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research-W",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Machine Learning",
+          "Machine Learning For Communications"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Machine Learning"
+      },
+      {
+        "from": [
+          "Multi-Agent Systems",
+          "Multi-Agent Systems - Engineering Stability - Dynamics And Control - Time-Delay Systems"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Multi-Agent Systems"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research-W"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "Area of Research-W",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Bio-Inspired AI",
+          "Bio-Inspired Algorithms",
+          "Bio-Inspired Intelligence"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Bio-Inspired AI"
+      },
+      {
+        "from": [
+          "Communications",
+          "Communication Systems",
+          "Communication Theory"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Communications"
+      },
+      {
+        "from": [
+          "Data Security",
+          "Data Security & Privacy"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Data Security"
+      }
+    ],
+    "description": "Mass edit cells in column Area of Research-W"
+  },
+  {
+    "op": "core/multivalued-cell-join",
+    "columnName": "Area of Research",
+    "keyColumnName": "Name",
+    "separator": "/",
+    "description": "Join multi-valued cells in column Area of Research"
+  },
+  {
+    "op": "core/multivalued-cell-join",
+    "columnName": "Area of Research-W",
+    "keyColumnName": "Name",
+    "separator": "/",
+    "description": "Join multi-valued cells in column Area of Research-W"
+  }
+]
