@@ -1,0 +1,49 @@
+
+ Delete step 1 
+Column input on step 1 -- ['Book Title.v0'] 
+Affected columns on step 1 -- ['Book-Title.v0'] 
+As a result, the affected steps: []
+ Delete step 2 
+Column input on step 2 -- ['Author.v0'] 
+Affected columns on step 2 -- ['Author.v1'] 
+Column Author 2.v0 depends on Column Author.v1 
+Probamatic steps: 6--('Author.v1', 'Author 2.v0') 
+Probamatic steps: 7--('Author 2.v0', 'remove-Author 2.v0') 
+Column remove-Author 2.v0 depends on Column Author.v1 
+Probamatic steps: 7--('Author 2.v0', 'remove-Author 2.v0') 
+Column Author 1.v0 depends on Column Author.v1 
+Probamatic steps: 6--('Author.v1', 'Author 1.v0') 
+Probamatic steps: 8--('Author 1.v0', 'Citation.v0') 
+Column Citation.v0 depends on Column Author.v1 
+Probamatic steps: 8--('Author 1.v0', 'Citation.v0') 
+Probamatic steps: 8--('Date.v1', 'Citation.v0') 
+As a result, the affected steps: [8, 6, 7]
+ Delete step 3 
+Column input on step 3 -- ['Date.v0'] 
+Affected columns on step 3 -- ['Date.v1'] 
+Column Citation.v0 depends on Column Date.v1 
+Probamatic steps: 8--('Author 1.v0', 'Citation.v0') 
+Probamatic steps: 8--('Date.v1', 'Citation.v0') 
+As a result, the affected steps: [8]
+ Delete step 4 
+Column input on step 4 -- [] 
+Affected columns on step 4 -- [] 
+As a result, the affected steps: []
+
+ Removing step-5: not recorded in the recipe; 
+
+ Delete step 6 
+Column input on step 6 -- ['Author.v1'] 
+Affected columns on step 6 -- ['Author 2.v0', 'Author 1.v0'] 
+Column remove-Author 2.v0 depends on Column Author 2.v0 
+Probamatic steps: 7--('Author 2.v0', 'remove-Author 2.v0') 
+Column Citation.v0 depends on Column Author 1.v0 
+Probamatic steps: 8--('Author 1.v0', 'Citation.v0') 
+Probamatic steps: 8--('Date.v1', 'Citation.v0') 
+As a result, the affected steps: [8, 7]
+ Delete step 7 
+Column input on step 7 -- ['Author 2.v0'] 
+Affected columns on step 7 -- ['remove-Author 2.v0'] 
+As a result, the affected steps: []
+
+ Removing the last step: step-8 
