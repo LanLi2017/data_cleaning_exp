@@ -342,16 +342,8 @@ def translate_operator_json_to_graph(json_data, schemas):
                     {'col_name': combine, 'label': f'{create_new_node_of_column(combine)}', 'color': _gen_val_color_}
                 ]
 
-            elif operator['op'] == 'core/row-removal':
-                cur_schema = schemas[i]
-                for col in cur_schema:
-                    graph.in_node_names += [
-                        {'col_name': col, 'label': f'{get_column_current_node(col)}'}  # column name: label[unique]
-                    ] 
-                    graph.process.append([f'({i}) row-removal {col}']) 
-                    graph.out_node_names += [
-                         {'col_name': col, 'label': f'{create_new_node_of_column(col)}', 'color': _color_}
-                    ]
+            # elif operator['op'] == 'core/row-removal':
+            #     pass
             elif operator['op'] == 'core/column-move':
                 index = operator['index']
                 graph.process = [f'({i}) Move_to #{index}']
@@ -376,7 +368,7 @@ def translate_operator_json_to_graph(json_data, schemas):
                 column_name = operator['columnName']
                 desc = operator['description']
                 row_number = operator['row']
-                process = f'single_cell_edit row #{row_number}'
+                process = f'single_cell_edit'
                 graph.process = [f'({i}) {process}']
                 graph.in_node_names += [
                     {'col_name': column_name, 'label': f'{get_column_current_node(column_name)}'}
@@ -458,7 +450,7 @@ def translate_operator_json_to_graph(json_data, schemas):
                 column_name = description[-1]
                 desc = operator['description']
                 row_number = desc.split(",")[0].split(" ")[-1]
-                process = f'single_cell_edit row #{row_number}'
+                process = f'single_cell_edit'
                 graph.process = [f'({i}) {process}']
                 graph.in_node_names += [
                     {'col_name': column_name, 'label': f'{get_column_current_node(column_name)}'}
@@ -469,22 +461,27 @@ def translate_operator_json_to_graph(json_data, schemas):
                 ]
             else:
                 pass
-        
-        if len(graph.process) == 1:
-            print(f'check input node: {graph.in_node_names}')
-            graph.edge += [{'from': graph.in_node_names, 'to': graph.process},
+
+        graph.edge += [{'from': graph.in_node_names, 'to': graph.process},
                         {'from': graph.process, 'to': graph.out_node_names}]
-            orma_data.append(graph)
-        elif len(graph.process) > 1:
-            processes = graph.process
-            for sub_id, sub_process in enumerate(processes):
-                graph.edge += [
-                    {'from': [graph.in_node_names[sub_id]], 'to': sub_process},
-                    {'from': sub_process, 'to': [graph.out_node_names[sub_id]]}
-                ]
-            orma_data.append(graph)
-        
+
+        orma_data.append(graph)
     return orma_data
+
+        # if len(graph.process) == 1:
+        # graph.edge += [{'from': graph.in_node_names, 'to': graph.process},
+        #             {'from': graph.process, 'to': graph.out_node_names}]
+        # orma_data.append(graph)
+        # elif len(graph.process) > 1:
+        #     processes = graph.process
+        #     for sub_id, sub_process in enumerate(processes):
+        #         graph.edge += [
+        #             {'from': [graph.in_node_names[sub_id]], 'to': sub_process},
+        #             {'from': sub_process, 'to': [graph.out_node_names[sub_id]]}
+        #         ]
+        #     orma_data.append(graph)
+        
+    # return orma_data
 
 
 def get_node_from_ormadata(orma_data):
@@ -1379,7 +1376,7 @@ def table_view(json_data, combined=False):
                 column_name = f'col-name "{description[-1]}"'
                 desc = operator['description']
                 row_number = desc.split(",")[0].split(" ")[-1]
-                process = f'single_cell_edit row #{row_number}'
+                process = process = f'single_cell_edit row #{row_number}'
                 graph.process = [f'({i}) {process}']
                 if not combined:
                     graph.in_node_names += [
@@ -1557,7 +1554,7 @@ def cluster_main(json_data, schema_info):
     new_edges = []
     for graph in orma_data:
         new_edges += [{'from': graph.in_node_names, 'to': graph.out_node_names}]
-
+    
     neighbors_of, nodes = write_linked_dep(new_edges)
     components = []
     visited_nodes = set()
@@ -1572,7 +1569,7 @@ def cluster_main(json_data, schema_info):
     return components
 
 
-def split_recipe(json_data, schema_info, output_gv='modular_views/module_view'):
+def split_recipe(json_data, schema_info, output_gv=None):
     # how to define subworkflow:
     # same input or same output
     components = cluster_main(json_data, schema_info)
@@ -1606,14 +1603,16 @@ def split_recipe(json_data, schema_info, output_gv='modular_views/module_view'):
                 json_res.append(operators[index])
                 cluster_schemas.append(schemas[index])
         if json_res:
-            with open(f'{output_gv}_{counter}.json', 'w')as f:
-                json.dump(json_res, f, indent=4)
-            # output_gv = f'{output_gv}_{counter}'
-            orma_g = generate_dot(json_res, cluster_schemas, f'{output_gv}_{counter}')
-            orma_g.view()
-            counter += 1
+            if output_gv:
+                with open(f'{output_gv}_{counter}.json', 'w')as f:
+                    json.dump(json_res, f, indent=4)
+                # output_gv = f'{output_gv}_{counter}'
+                orma_g = generate_dot(json_res, cluster_schemas, f'{output_gv}_{counter}')
+                orma_g.view()
+                counter += 1
         else:
             pass
+    return clusters
 
 
 class ORMA:

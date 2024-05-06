@@ -13,7 +13,7 @@ from ORMA.OpenRefineClientPy3.google_refine.refine import refine
 # from ORMA.OpenRefineClientPy3.google_refine.refine.refine import RowsResponseFactory
 
 from ORMA.extra_info import generate_recipe
-from ORMA.orma import ORMAProcessor, cluster_main, get_schema_list, merge_basename, translate_operator_json_to_graph
+from ORMA.orma import ORMAProcessor, cluster_main, generate_dot, get_node_from_ormadata, get_schema_list, merge_basename, split_recipe, translate_operator_json_to_graph, write_linked_dep
 
 
 def aug_recipe(project_id):
@@ -102,6 +102,7 @@ def col_extract(recipe):
                     pass
         if col_dict:
             cols.append(col_dict)
+    print(cols)
     return cols
 
 
@@ -117,17 +118,6 @@ def exe_enhanced_recipe(project_id, fname):
     with open(fname, 'w')as fp:
         json.dump(enhanced_recipe, fp, indent=4)
     return enhanced_recipe, schema_info
-
-
-# Detect linked nodes
-def dfs(graph, u):
-    visited_nodes = [u]
-    try:
-        for v in graph[u]:
-            visited_nodes += dfs(graph, v)
-    except KeyError:
-        pass
-    return visited_nodes
 
 
 def detect_conflicts():
@@ -150,26 +140,32 @@ def main():
     #     r1 = json.load(fp)
     # list_ops_r1 = meta_extract(r1)
 
+
 def test_():
-    recipe, schema_info = exe_enhanced_recipe(1720089821831, "recipes/enhanced_orma/test_rremoval.json")
-    
-    # schemas = get_schema_list(schema_info)
-    orma_proc = ORMAProcessor()
-    # orma_data = translate_operator_json_to_graph(recipe, schemas)
+    pass
+
+    # components = cluster_main(recipe, schema_info)
+    # clusters = split_recipe(recipe, schema_info)
+    # print(components)
     # for data in orma_data:
     #     print(data.process)
     #     print(data.in_node_names)
-    orma_proc.generate_views(output="ORMA_Output/test_rremoval.png", type= 'parallel_view',
-                             json_data=recipe, schema_info=schema_info)
-    cols = col_extract(recipe) # [{'Book Title': 0}, {''}]
+
+    # orma_proc = ORMAProcessor()
+    # orma_proc.generate_views(output="ORMA_Output/alice_parallel.png", type= 'parallel_view',
+    #                          json_data=recipe, schema_info=schema_info)
+
+    # cols = col_extract(recipe) # [{'Book Title': 0}, {''}]
+    # print(cols)
     
     # column_ids: dict[str, set[int]] = {}
     # for arrangement in cols:
     #     for col, col_id in arrangement.items():
     #         column_ids.setdefault(col, set()).add(col_id)
-    
+    # print(column_ids)
+
     # result = []
-    # query = cluster_main(2221256614441)
+    # query = cluster_main(recipe, schema_info)
     # for columns in query:
     #     ids = set()
     #     for col in columns:
