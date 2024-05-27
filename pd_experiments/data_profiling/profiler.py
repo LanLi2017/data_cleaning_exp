@@ -1,7 +1,9 @@
 from collections import Counter
 from pprint import pprint
+import re
 import pandas as pd
 from nltk.tokenize import RegexpTokenizer
+from nltk import ngrams
 
 
 def word_occur(rows: pd.Series):
@@ -30,6 +32,34 @@ def word_occur(rows: pd.Series):
     return values_seq
 
 
+def preprocess(cell):
+    tokens = re.split(r'[;,\s:]+', cell)
+    # tokens = [token for token in tokens if not any(char.isdigit() for char in token)]
+    tokens = [token for token in tokens if token]
+    return ['bos'] + tokens + ['eos']
+
+def phrase_detect(cell_values):
+    # Using N-grams to detect the occurrance of "phrase"
+    tokenized_cells = [preprocess(cell) for cell in cell_values]
+    # Flatten the list of tokenized cells
+    flattened_tokens = [token for sublist in tokenized_cells for token in sublist]
+    # Generate bigrams
+    bigrams = list(ngrams(flattened_tokens, 2))
+    filtered_bigrams = [gram for gram in bigrams 
+                        if 'bos' not in gram and 'eos' not in gram]
+    # Count the frequency of each bigram
+    bigram_counts = Counter(filtered_bigrams)
+    # Display the most common bigrams
+    pprint(bigram_counts)
+    # Convert Counter to dictionary
+    phrase_counts_dict = dict(bigram_counts)
+
+    # Create DataFrame from dictionary
+    df = pd.DataFrame(list(phrase_counts_dict.items()), 
+                      columns=['Occurrance', 'Frequency'])
+    df.to_csv("phrase_occur.csv")
+
+
 def main():
     # Read csv
     df = pd.read_csv("../data_input/menu.csv")
@@ -38,6 +68,9 @@ def main():
     # Concatenate rows of values in a sequence 
     # Count word occurance
     res_df = word_occur(df[target_col])
+
+    # Count phrase
+    phrase_detect(df[target_col].dropna().tolist())
 
 
 if __name__ == "__main__":
