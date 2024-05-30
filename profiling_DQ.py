@@ -40,7 +40,7 @@ def categ_values(filtered_ids, df, col='size'):
 
 
 def main():
-    parent_folder = 'data_quality_exp/input.dataset'
+    parent_folder = 'data_quality_exp'
     # split_mapping: locate 4th as size; 
     # split_recursive: recursive and appending values-split;
     # split_normalize_len: locate outliers by length; 
@@ -51,7 +51,7 @@ def main():
                'pd_split_regex_recur.csv']
     cols = ['id', 'size']
     # load ground truth dataset
-    gd_dataset = 'data_quality_exp/ground_truth_pd/menu_size.csv'
+    gd_dataset = f'{parent_folder}/ground_truth_pd/menu_size.csv'
     gd_df = pd.read_csv(gd_dataset)
     # unit: [cm, inches, unknown]
     # filtered NA rows => measure completeness
@@ -69,7 +69,7 @@ def main():
     ev_res = []
 
     for ds in dataset:
-        target_df = pd.read_csv(f"{parent_folder}/{ds}")
+        target_df = pd.read_csv(f"{parent_folder}/input.dataset/{ds}")
         print(f'The total rows of target dataset: {target_df.shape[0]}')
 
         # Task I : Calculate Completeness 
@@ -105,6 +105,7 @@ def main():
                              columns=['Dataset', 'Completeness', 'Accuracy', 'Consistency'])
     
     print(ev_matrix)
+    ev_matrix.to_csv(f'{parent_folder}/output.matrix/ev_matrix.csv')
 
 if __name__ == '__main__':
     main()
