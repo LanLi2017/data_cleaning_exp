@@ -1,31 +1,10 @@
 [Task]
-    Given dataset: menu.csv, which contains a list of target column with composite values,
-    describing the physical description of the menu: its card type, decoration, and or other details,
-    and size information.
+    Given dataset: menu.csv, which contains the target column `physical_description` 
+    with a list of composite values, describing the physical description of the menu: 
+    its card type, decoration, and or other details, and size information.
 [/TASK]
-[Data Quality Issues] 
-    1. The information contained in cell values are not consistent, partial
-    or more details could be given. 
-    2. The composite cell values are separated by various special characters, e.g., semicolon, or comma. 
-    3. Mispellings could occur 
-[/Data Quality Issues]
 [Objectives] 
     1. Format cell value into [digitXdigit] or a pair of digitXdigit with key information. 
     2. Normalize the Unit. If the unit is "cm", convert it to inches. If the unit is missing, predit the unit and 
     determine whether conversion should be applied or not. 
 [/Objectives]
-[Example]
-    1. Input: "CARD; ILLUS; COL; 4/75X7.25;"
-    Return: 4.75 X 7.25
-    Explain: replace slash with dot, the probability that 4.75 is measured by inches is higher 
-    or cm. 
-    2. Input: "folder with paper insert; 6.5 x 9.875 inches; embossed (cover)"
-    Return: 6.5 x 9.875
-    Explain: already by inches
-    3. Input: "2 pieces; booklet, 10.5 x 15 inches; folder, 5.5 x 8.5 inches"
-    Return: 10.5 X 15  booklet; 5.5 X 8.5  folder
-    Explain: a pair of digitXdigit is given, and already by inches
-    4. Input: "Tri-fold; 9.75 x 13.25 in. folded; 9.75 x 26 in. unfolded"
-    Return: 9.75X13.25 folded;9.75X26 open
-    Expalin: in.: inches, unfolded: normalize to open to make it consistent.
-[/Example]

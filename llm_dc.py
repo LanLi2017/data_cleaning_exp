@@ -5,11 +5,14 @@ import json
 import requests
 import re
 
-# model = "llama3"
-model = 'stablelm-zephyr'
-# llm = Ollama(model="llama3")
-# res = llm.predict(input)
-# print (res)
+model = "llama3"
+# model = 'stablelm-zephyr'
+
+# EXP:
+# 1. init: only description and data cleaning task
+# 2. exp_no_samples: only briefly describe data quality issues and example cleaned results, task
+# 3. exp_samples: + sample dataset
+# 4. df: instruct llm with data profiling results 
 
 def extract_content_from_file(content):
     # Regular expression to match [label]...[/label] blocks
@@ -20,7 +23,6 @@ def extract_content_from_file(content):
     res = []
     for match in matches:
         res.append(' '.join(match).strip())
-    print(res)
     return res
 
 
@@ -61,18 +63,25 @@ def main():
     # Sample 1000 rows
     df_sampled = df_prep.sample(n=1000, random_state=42)
     prompt_parent = 'prompt'
-    prompt_f = 'prompt_init.txt'
+    # prompt_f = 'prompt_init.txt' # zero shot 
+    # prompt_f = 'prompt_exp_no_samples.txt' # few shots 
+    prompt_f = 'prompt_exp_samples.txt' # few shots 
     with open(f'{prompt_parent}/{prompt_f}', 'r')as pf:
         content = pf.read()
         # Extract content from the text file
         prompts = extract_content_from_file(content)
-    prompts_data = prompts + [f"Sample cells values from target column:{df_sampled}"] + [""]
+    prompts_data = prompts + [f"Sample cells values from target column:{df_sampled['physical_description']}"] + [""]
+    # prompts_data = prompts + [""]
     context = []
     i = 0
     log_f = open(f'llm_res/{prompt_f}', 'w')
     while i < len(prompts_data):
         if i == len(prompts_data)-1:
-            user_input = "Write a python script to extract size information from this target column. "
+            user_input = "Write a python script to extract size information from this target column. \
+                          Dataset input: `menu.csv`. The target column name is `physical_description`.\
+                          Create a new column `size` as the expected results extracting the required \
+                          information."
+
         else:
             user_input = prompts_data[i]
         print(user_input)

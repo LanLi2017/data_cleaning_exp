@@ -7,7 +7,7 @@ import pandas as pd
 import re
 
 # Load the menu.csv dataset
-df = pd.read_csv('menu.csv')
+df = pd.read_csv('../menu.csv')
 
 # Define a regular expression pattern to match sizes (e.g., 10cm, 5inches)
 size_pattern = r'(\d+(?:\.\d+)?)([a-z]+)'
@@ -16,25 +16,35 @@ size_pattern = r'(\d+(?:\.\d+)?)([a-z]+)'
 sizes = []
 
 # Iterate through each row in the dataset
+count_ = 0
 for index, row in df.iterrows():
     # Extract size information from physical_description column using regular expression
-    match = re.search(size_pattern, row['physical_description'])
-    
-    if match:
-        # Extract the numeric value (size) and unit (e.g., cm, inches)
-        size_value = float(match.group(1))
-        size_unit = match.group(2).lower()
-        
-        # Convert units from centimeters to inches
-        if size_unit == 'cm':
-            size_value *= 0.3937
-        
-        # Append the extracted size information to the list
-        sizes.append((size_value, size_unit))
+    if pd.isnull(row['physical_description']):
+        sizes.append(None)
+    else:
+        match = re.search(size_pattern, row['physical_description'])
+        if match:
+            count_ += 1
+            # Extract the numeric value (size) and unit (e.g., cm, inches)
+            size_value = float(match.group(1))
+            size_unit = match.group(2).lower()
+            
+            # Convert units from centimeters to inches
+            if size_unit == 'cm':
+                size_value *= 0.3937
+            
+            # Append the extracted size information to the list
+            sizes.append((size_value, size_unit))
+        else:
+            # Keep the original cell values if not match
+            sizes.append(None)
 
 # Create a new column 'size' and populate it with the extracted size information
 df['size'] = sizes
+
 print(df.head())  # Print the first few rows of the updated dataset
+print(count_)
+df.to_csv('../cleaned_ds/init_size.csv', index=False)
 # Here's how the script works:
 
 # 1. Load the `menu.csv` dataset into a pandas DataFrame using `pd.read_csv`.
