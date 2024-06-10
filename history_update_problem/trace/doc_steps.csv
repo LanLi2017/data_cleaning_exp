@@ -1,0 +1,35 @@
+Method Name,Step Name,Rationale,Functionality,Column Input, Column Schema Change
+m1_split_only,split column physical_description into several columns by separator ;,cell values in target column is composite,decompose composite values by given separator,physical_description,True
+m1_split_only,rename column physical_description 4 to size,give a more meaningful column name,"keep cells values unchanged ,and modify the schema for the whole table",physical_description,True
+m2_split_iter,split column physical_description into several columns by separator ;,cell values in target column is composite,decompose composite values by given separator,physical_description,True
+m2_split_iter,create new column temp based on column physical_description 4,copying cell values from `physical_description 4` to new empty column `temp`,duplicate values to column `temp`,"physical_description 4",True
+m2_split_iter,text transform on column temp,copying pasting non-NA cell values from `physical_description 3` to column `temp`,update cell values on column `temp`, "physical_description 3, temp", False
+m2_split_iter,text transform on column temp,copying pasting non-NA cell values from `physical_description 2` to column `temp`,update cell values on column `temp`, "physical_description 2, temp", False
+m2_split_iter,text transform on column temp,copying pasting non-NA cell values from `physical_description 1` to column `temp`,update cell values on column `temp`, "physical_description 1, temp", False
+m2_split_iter,rename column temp to size,give a more meaningful column name,"keep cells values unchanged ,and modify the schema for the whole table",temp,True
+m3_split_regex,split column physical_description into several columns by separator ;,cell values in target column is composite,decompose composite values by given separator,physical_description,True
+m3_split_regex,create new column temp based on column `physical_description 4`,using regex to search valid cell values from `physical_description 4` to new empty column `temp`,match and duplicate values to column `temp`,"physical_description 4",True
+m3_split_regex,text transform on column temp,duplicate non-NA cell values that match the defined pattern from `physical_description 3` to column `temp`,update cell values on column `temp`, "physical_description 3, temp", False
+m3_split_regex,text transform on column temp,duplicate non-NA cell values that match the defined pattern from `physical_description 2` to column `temp`,update cell values on column `temp`, "physical_description 2, temp", False
+m3_split_regex,text transform on column temp,duplicate non-NA cell values that match the defined pattern from `physical_description 1` to column `temp`,update cell values on column `temp`, "physical_description 1, temp", False
+m3_split_regex,rename column temp to size,give a more meaningful column name,"keep cells values unchanged ,and modify the schema for the whole table",temp,True
+m4_split_regex,split column physical_description into several columns by separator ;,cell values in target column is composite,decompose composite values by given separator,physical_description,True
+m4_split_regex,trim white spaces on column `physical_description 4`,revise the data values to match the pattern,remove extra white spaces for the cells`,"physical_description 4",False
+m4_split_regex,create new column temp based on column `physical_description 4`,using regex to search valid cell values from `physical_description 4` to new empty column `temp`,match and duplicate values to column `temp`,"physical_description 4",True
+m4_split_regex,trim white spaces on column `physical_description 3`,revise the data values to match the pattern,remove extra white spaces for the cells`,"physical_description 3",False
+m4_split_regex,text transform on column temp,duplicate non-NA cell values that match the defined pattern from `physical_description 3` to column `temp`,update cell values on column `temp`, "physical_description 3, temp", False
+m4_split_regex,trim white spaces on column `physical_description 2`,revise the data values to match the pattern,remove extra white spaces for the cells`,"physical_description 2",False
+m4_split_regex,text transform on column temp,duplicate non-NA cell values that match the defined pattern from `physical_description 2` to column `temp`,update cell values on column `temp`, "physical_description 2, temp", False
+m4_split_regex,trim white spaces on column `physical_description 1`,revise the data values to match the pattern,remove extra white spaces for the cells`,"physical_description `",False
+m4_split_regex,text transform on column temp,duplicate non-NA cell values that match the defined pattern from `physical_description 1` to column `temp`,update cell values on column `temp`, "physical_description 1, temp", False
+m4_split_regex,rename column temp to size,give a more meaningful column name,"keep cells values unchanged ,and modify the schema for the whole table",temp,True
+m5_split_regex,split column physical_description into several columns by separator ;,cell values in target column is composite,decompose composite values by given separator,physical_description,True
+m5_split_regex,trim white spaces on column `physical_description 4`,revise the data values to match the pattern,remove extra white spaces for the cells`,"physical_description 4",False
+m5_split_regex,create new column temp based on column `physical_description 4`,using regex to search valid cell values from `physical_description 4` to new empty column `temp`,match and duplicate values to column `temp`,"physical_description 4",True
+m5_split_regex,trim white spaces on column `physical_description 3`,revise the data values to match the pattern,remove extra white spaces for the cells`,"physical_description 3",False
+m5_split_regex,text transform on column temp,duplicate non-NA cell values that match the defined pattern from `physical_description 3` to column `temp`,update cell values on column `temp`, "physical_description 3, temp", False
+m5_split_regex,trim white spaces on column `physical_description 2`,revise the data values to match the pattern,remove extra white spaces for the cells`,"physical_description 2",False
+m5_split_regex,text transform on column temp,duplicate non-NA cell values that match the defined pattern from `physical_description 2` to column `temp`,update cell values on column `temp`, "physical_description 2, temp", False
+m5_split_regex,trim white spaces on column `physical_description 1`,revise the data values to match the pattern,remove extra white spaces for the cells`,"physical_description `",False
+m5_split_regex,text transform on column temp,duplicate non-NA cell values that match the defined pattern from `physical_description 1` to column `temp`,update cell values on column `temp`, "physical_description 1, temp", False
+m5_split_regex,rename column temp to size,give a more meaningful column name,"keep cells values unchanged ,and modify the schema for the whole table",temp,True

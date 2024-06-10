@@ -1,0 +1,23 @@
+[
+  {
+    "op": "core/column-split",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "physical_description",
+    "guessCellType": true,
+    "removeOriginalColumn": false,
+    "mode": "separator",
+    "separator": ";",
+    "regex": false,
+    "maxColumns": 0,
+    "description": "Split column physical_description by separator"
+  },
+  {
+    "op": "core/column-rename",
+    "oldColumnName": "physical_description 4",
+    "newColumnName": "size",
+    "description": "Rename column physical_description 4 to size"
+  }
+]

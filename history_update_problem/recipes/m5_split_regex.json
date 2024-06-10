@@ -1,0 +1,218 @@
+[
+  {
+    "op": "core/column-split",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "physical_description",
+    "guessCellType": true,
+    "removeOriginalColumn": false,
+    "mode": "separator",
+    "separator": ";",
+    "regex": false,
+    "maxColumns": 0,
+    "description": "Split column physical_description by separator"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "physical_description 4",
+    "expression": "value.trim()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column physical_description 4 using expression value.trim()"
+  },
+  {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "temp",
+          "expression": "value",
+          "columnName": "temp",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "baseColumnName": "physical_description 4",
+    "expression": "jython:import re\npattern = r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nmatch = re.search(pattern, value)\nif match:\n   return value\nelse:\n   return None",
+    "onError": "set-to-blank",
+    "newColumnName": "temp",
+    "columnInsertIndex": 11,
+    "description": "Create column temp at index 11 based on column physical_description 4 using expression jython:import re\npattern = r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nmatch = re.search(pattern, value)\nif match:\n   return value\nelse:\n   return None"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "temp",
+          "expression": "value",
+          "columnName": "temp",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "physical_description 3",
+    "expression": "value.trim()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column physical_description 3 using expression value.trim()"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "temp",
+          "expression": "value",
+          "columnName": "temp",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "temp",
+    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"physical_description 3\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column temp using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"physical_description 3\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "temp",
+          "expression": "value",
+          "columnName": "temp",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "physical_description 2",
+    "expression": "value.trim()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column physical_description 2 using expression value.trim()"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "temp",
+          "expression": "value",
+          "columnName": "temp",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "temp",
+    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"physical_description 2\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column temp using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"physical_description 2\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "temp",
+          "expression": "value",
+          "columnName": "temp",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "physical_description 1",
+    "expression": "value.trim()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column physical_description 1 using expression value.trim()"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "temp",
+          "expression": "value",
+          "columnName": "temp",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "temp",
+    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"physical_description 1\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column temp using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"physical_description 1\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+  },
+  {
+    "op": "core/column-rename",
+    "oldColumnName": "temp",
+    "newColumnName": "size",
+    "description": "Rename column temp to size"
+  }
+]
