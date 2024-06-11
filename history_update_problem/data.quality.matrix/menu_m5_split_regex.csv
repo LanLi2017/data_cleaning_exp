@@ -1,0 +1,101 @@
+id,size_gt,size_tg,comparison
+17009,4.25X6.5,4.25X6.5,True
+31794,15x9cm folded;15x18cm open,15x18cm open,False
+16783,7.25X12.75,7.25X12.75,True
+19732,5.5X8.5,5.5X8.5,True
+33052,28x17.5cm,28x17.5cm,True
+23102,5.25X8,5.25X8,True
+14110,3.75 X 6,3.75 X 6,True
+34345,22x13.5cm,22x13.5cm,True
+21454,4.5X6.75,4.5X6.75,True
+26252,4.5 X 7.5,4.5 X 7.5,True
+16939,5.5 X 8.5,5.5 X 8.5,True
+13812,7 X 11,7 X 11,True
+14450,3.5X5.25,3.5X5.25,True
+21698,5.5 X 9.5,5.5 X 9.5,True
+24319,,,True
+29808,21.5x14cm folded;21.5x28cm open,21.5x28cm open,False
+20188,5.25 X 7.75,5.25 X 7.75,True
+34427,16.5x10cm folded;16.5x20cm open,16.5x20cm open,False
+26880,10 x 12.5 inches,10 x 12.5 inches,True
+30223,30x22cm folded;30x44cm open,30x44cm open,False
+21658,6 X 9,6 X 9,True
+30574,28x20.5cm folded;28x41cm open,28x41cm open,False
+31053,19.5x14cm,19.5x14cm,True
+26288,6X10,6X10,True
+22701,6.25X10.0,6.25X10.0,True
+30411,27x16cm folded;27x31.5cm open,27x31.5cm open,False
+28675,34x24cm folded;34x48cm open,34x48cm open,False
+27707,11 x 7 inches,11 x 7 in.,False
+13250,4.75X6.25,4.75X6.25,True
+24815,5.25X8,5.25X8,True
+24183,5.25X8,5.25X8,True
+20905,5.5 X 7.75,5.5 X 7.75,True
+28479,21.5x10.5cm folded;21.5x30cm open,21.5x30cm open,False
+19899,6.5 X 7.75,6.5 X 7.75,True
+31137,34x23cm,34x23cm,True
+28600,36x27cm folded;36x52cm open,36x52cm open,False
+26358,5.5 x 8 inches,5.5 x 8 inches,True
+20950,5X7.25,5X7.25,True
+23045,5 X 8,5 X 8,True
+30195,27.5x20.5cm folded;27.5x41cm open,27.5x41cm open,False
+30537,31x23cm,31x23cm,True
+12960,4X5.5,4X5.5,True
+20115,5.5X8.25,5.5X8.25,True
+31183,28x17.5cm,28x17.5cm,True
+33748,18x12cm folded;18x26.5cm open,18x26.5cm open,False
+33736,25x14cm,25x14cm,True
+21204,7.75X10,7.75X10,True
+31744,26x18.5cm folded;26x37cm open,26x37cm open,False
+25679,5.75X9,5.75X9,True
+23659,8.5X6.5,8.5X6.5,True
+30052,23.5x15.5cm folded;23.5x30.5cm open,23.5x30.5cm open,False
+14009,5.25 X 8.25,5.25 X 8.25,True
+27235,8 x 5 inches folded,8 x 5 in. fold.,False
+34080,21.5x13.5cm,21.5x13.5cm,True
+32927,16.5x21.5cm,16.5x21.5cm,True
+20484,10.25 X 9.5,10.25 X 9.5,True
+21673,8.5 X 5,8.5 X 5,True
+31474,20x14cm folded;20x28cm open,20x28cm open,False
+24904,4.75X6.5,4.75X6.5,True
+22289,5.5 X 8.5,5.5 X 8.5,True
+28426,38x24cm,38x24cm,True
+21942,6.5X3.5,6.5X3.5,True
+33871,13.5x8cm,13.5x8cm,True
+33658,27x20cm folded;27x40cm open,27x40cm open,False
+21031,4X6,4X6,True
+33591,15x12cm folded;15x24cm open,15x24cm open,False
+28355,21x10cm folded;21x39.5cm open,21x39.5cm open,False
+31442,24x16.5cm folded;24x33cm open,24x33cm open,False
+31428,16x10cm,16x10cm,True
+25792,7.25 X 10.25,7.25 X 10.25,True
+13275,5.5X6.75,5.5X6.75,True
+34342,16.5x8.5cm,16.5x8.5cm,True
+32462,33x18cm,33x18cm,True
+30420,17.5x11.5cm,17.5x11.5cm,True
+24753,5.25X8.25,5.25X8.25,True
+14500,4.5X6.25,4.5X6.25,True
+32800,27.5x17cm folded;27.5x34cm open,27.5x34cm open,False
+21438,5 X 7,5 X 7,True
+27174,11 x 8 inches folded,11 x 8 in. fold.,False
+32620,33x18cm,33x18cm,True
+28243,30x22.5cm folded;30x45cm open,30x45cm open,False
+13703,5.5X8.25,5.5X8.25,True
+21063,4.5X8,4.5X8,True
+26731,6 x 9 inches,6 x 9 inches,True
+31455,21.5x15.5cm folded,21.5x15.5cm folded,True
+33125,31x13.5cm,31x13.5cm,True
+16769,10.25X9.5,10.25X9.5,True
+25092,4.5X8.75,4.5X8.75,True
+20405,5.5X6.75,5.5X6.75,True
+24874,5.5X8,5.5X8,True
+27097,8.5 x 5.5 inches folded,8 1/2 x 5 1/2 in. fold.,False
+13050,3.5 X 5.75,3.5 X 5.75,True
+28814,28x22cm,28x22cm,True
+28667,33x25cm folded;33x50cm open,33x50cm open,False
+14282,4.75X7,4.75X7',False
+17039,4.25X6.5,4.25X6.5,True
+31780,23.5x14cm folded;23.5x28.5cm open,23.5x28.5cm open,False
+22266,4.6X7.25,4.6X7.25,True
+28380,24x16cm folded;24x31.5cm open,24x31.5cm open,False
+20826,4 X 6.25,4 X 6.25,True

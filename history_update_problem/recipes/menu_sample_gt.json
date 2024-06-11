@@ -342,77 +342,45 @@
     "description": "Text transform on cells in column size using expression jython:if 'fold.' in value:\n  return value.replace('fold.', 'folded')\nelse:\n  return value"
   },
   {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "baseColumnName": "size",
+    "expression": "jython:import re\npattern = re.compile(r'\\b(\\d+(\\.\\d+)?)\\s*[xX]\\s*(\\d+(\\.\\d+)?)\\s*(cm|inches)\\s*(folded|open)?\\b', re.IGNORECASE)\nif pattern.search(value):\n   return value",
+    "onError": "set-to-blank",
+    "newColumnName": "size_temp",
+    "columnInsertIndex": 8,
+    "description": "Create column size_temp at index 8 based on column size using expression jython:import re\npattern = re.compile(r'\\b(\\d+(\\.\\d+)?)\\s*[xX]\\s*(\\d+(\\.\\d+)?)\\s*(cm|inches)\\s*(folded|open)?\\b', re.IGNORECASE)\nif pattern.search(value):\n   return value"
+  },
+  {
     "op": "core/column-split",
     "engineConfig": {
       "facets": [
         {
           "type": "list",
-          "name": "flag",
+          "name": "size_temp",
           "expression": "value",
-          "columnName": "flag",
-          "invert": false,
+          "columnName": "size_temp",
+          "invert": true,
           "omitBlank": false,
           "omitError": false,
-          "selection": [
-            {
-              "v": {
-                "v": 1,
-                "l": "1"
-              }
-            }
-          ],
-          "selectBlank": false,
+          "selection": [],
+          "selectBlank": true,
           "selectError": false
         }
       ],
       "mode": "row-based"
     },
-    "columnName": "size",
+    "columnName": "size_temp",
     "guessCellType": true,
     "removeOriginalColumn": false,
     "mode": "separator",
     "separator": ";",
     "regex": false,
     "maxColumns": 0,
-    "description": "Split column size by separator"
-  },
-  {
-    "op": "core/column-removal",
-    "columnName": "size 5",
-    "description": "Remove column size 5"
-  },
-  {
-    "op": "core/column-addition",
-    "engineConfig": {
-      "facets": [
-        {
-          "type": "list",
-          "name": "flag",
-          "expression": "value",
-          "columnName": "flag",
-          "invert": false,
-          "omitBlank": false,
-          "omitError": false,
-          "selection": [
-            {
-              "v": {
-                "v": 1,
-                "l": "1"
-              }
-            }
-          ],
-          "selectBlank": false,
-          "selectError": false
-        }
-      ],
-      "mode": "row-based"
-    },
-    "baseColumnName": "size",
-    "expression": "jython:return",
-    "onError": "set-to-blank",
-    "newColumnName": "temp",
-    "columnInsertIndex": 8,
-    "description": "Create column temp at index 8 based on column size using expression jython:return"
+    "description": "Split column size_temp by separator"
   },
   {
     "op": "core/text-transform",
@@ -420,32 +388,25 @@
       "facets": [
         {
           "type": "list",
-          "name": "flag",
+          "name": "size_temp",
           "expression": "value",
-          "columnName": "flag",
-          "invert": false,
+          "columnName": "size_temp",
+          "invert": true,
           "omitBlank": false,
           "omitError": false,
-          "selection": [
-            {
-              "v": {
-                "v": 1,
-                "l": "1"
-              }
-            }
-          ],
-          "selectBlank": false,
+          "selection": [],
+          "selectBlank": true,
           "selectError": false
         }
       ],
       "mode": "row-based"
     },
-    "columnName": "temp",
-    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size 4\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "columnName": "size_temp 2",
+    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
     "onError": "keep-original",
     "repeat": false,
     "repeatCount": 10,
-    "description": "Text transform on cells in column temp using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size 4\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+    "description": "Text transform on cells in column size_temp 2 using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
   },
   {
     "op": "core/text-transform",
@@ -453,28 +414,99 @@
       "facets": [
         {
           "type": "list",
-          "name": "flag",
+          "name": "size_temp",
           "expression": "value",
-          "columnName": "flag",
-          "invert": false,
+          "columnName": "size_temp",
+          "invert": true,
           "omitBlank": false,
           "omitError": false,
-          "selection": [
-            {
-              "v": {
-                "v": 1,
-                "l": "1"
-              }
-            }
-          ],
-          "selectBlank": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "size_temp 2",
+    "expression": "value.trim()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column size_temp 2 using expression value.trim()"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "size_temp",
+          "expression": "value",
+          "columnName": "size_temp",
+          "invert": true,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "size_temp 1",
+    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column size_temp 1 using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "size_temp",
+          "expression": "value",
+          "columnName": "size_temp",
+          "invert": true,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "size_temp 1",
+    "expression": "value.trim()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column size_temp 1 using expression value.trim()"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "size_temp",
+          "expression": "value",
+          "columnName": "size_temp",
+          "invert": true,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
           "selectError": false
         },
         {
           "type": "list",
-          "name": "temp",
+          "name": "size_temp 2",
           "expression": "value",
-          "columnName": "temp",
+          "columnName": "size_temp 2",
           "invert": false,
           "omitBlank": false,
           "omitError": false,
@@ -485,12 +517,12 @@
       ],
       "mode": "row-based"
     },
-    "columnName": "temp",
-    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size 3\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "columnName": "size_temp",
+    "expression": "jython:return cells[\"size_temp 1\"][\"value\"]",
     "onError": "keep-original",
     "repeat": false,
     "repeatCount": 10,
-    "description": "Text transform on cells in column temp using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size 3\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+    "description": "Text transform on cells in column size_temp using expression jython:return cells[\"size_temp 1\"][\"value\"]"
   },
   {
     "op": "core/text-transform",
@@ -498,28 +530,21 @@
       "facets": [
         {
           "type": "list",
-          "name": "flag",
+          "name": "size_temp",
           "expression": "value",
-          "columnName": "flag",
-          "invert": false,
+          "columnName": "size_temp",
+          "invert": true,
           "omitBlank": false,
           "omitError": false,
-          "selection": [
-            {
-              "v": {
-                "v": 1,
-                "l": "1"
-              }
-            }
-          ],
-          "selectBlank": false,
+          "selection": [],
+          "selectBlank": true,
           "selectError": false
         },
         {
           "type": "list",
-          "name": "temp",
+          "name": "size_temp 1",
           "expression": "value",
-          "columnName": "temp",
+          "columnName": "size_temp 1",
           "invert": false,
           "omitBlank": false,
           "omitError": false,
@@ -530,12 +555,12 @@
       ],
       "mode": "row-based"
     },
-    "columnName": "temp",
-    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size 2\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "columnName": "size_temp",
+    "expression": "jython:return cells[\"size_temp 2\"][\"value\"]",
     "onError": "keep-original",
     "repeat": false,
     "repeatCount": 10,
-    "description": "Text transform on cells in column temp using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size 2\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+    "description": "Text transform on cells in column size_temp using expression jython:return cells[\"size_temp 2\"][\"value\"]"
   },
   {
     "op": "core/text-transform",
@@ -543,29 +568,34 @@
       "facets": [
         {
           "type": "list",
-          "name": "flag",
+          "name": "size_temp",
           "expression": "value",
-          "columnName": "flag",
-          "invert": false,
+          "columnName": "size_temp",
+          "invert": true,
           "omitBlank": false,
           "omitError": false,
-          "selection": [
-            {
-              "v": {
-                "v": 1,
-                "l": "1"
-              }
-            }
-          ],
-          "selectBlank": false,
+          "selection": [],
+          "selectBlank": true,
           "selectError": false
         },
         {
           "type": "list",
-          "name": "temp",
+          "name": "size_temp 1",
           "expression": "value",
-          "columnName": "temp",
-          "invert": false,
+          "columnName": "size_temp 1",
+          "invert": true,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "size_temp 2",
+          "expression": "value",
+          "columnName": "size_temp 2",
+          "invert": true,
           "omitBlank": false,
           "omitError": false,
           "selection": [],
@@ -575,12 +605,12 @@
       ],
       "mode": "row-based"
     },
-    "columnName": "temp",
-    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size 1\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "columnName": "size_temp",
+    "expression": "jython:v1 = cells[\"size_temp 1\"][\"value\"]\nv2 = cells[\"size_temp 2\"][\"value\"]\n\nreturn v1+\";\"+v2",
     "onError": "keep-original",
     "repeat": false,
     "repeatCount": 10,
-    "description": "Text transform on cells in column temp using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size 1\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+    "description": "Text transform on cells in column size_temp using expression jython:v1 = cells[\"size_temp 1\"][\"value\"]\nv2 = cells[\"size_temp 2\"][\"value\"]\n\nreturn v1+\";\"+v2"
   },
   {
     "op": "core/column-rename",
@@ -589,23 +619,37 @@
     "description": "Rename column size to size_old"
   },
   {
-    "op": "core/column-rename",
-    "oldColumnName": "temp",
-    "newColumnName": "size",
-    "description": "Rename column temp to size"
-  },
-  {
-    "op": "core/text-transform",
+    "op": "core/column-split",
     "engineConfig": {
-      "facets": [],
+      "facets": [
+        {
+          "type": "list",
+          "name": "size_temp",
+          "expression": "value",
+          "columnName": "size_temp",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
       "mode": "row-based"
     },
-    "columnName": "size",
-    "expression": "value.trim()",
-    "onError": "keep-original",
-    "repeat": false,
-    "repeatCount": 10,
-    "description": "Text transform on cells in column size using expression value.trim()"
+    "columnName": "size_old",
+    "guessCellType": true,
+    "removeOriginalColumn": false,
+    "mode": "separator",
+    "separator": ";",
+    "regex": false,
+    "maxColumns": 0,
+    "description": "Split column size_old by separator"
+  },
+  {
+    "op": "core/column-removal",
+    "columnName": "size_old 5",
+    "description": "Remove column size_old 5"
   },
   {
     "op": "core/text-transform",
@@ -613,9 +657,150 @@
       "facets": [
         {
           "type": "list",
-          "name": "flag",
+          "name": "size_temp",
           "expression": "value",
-          "columnName": "flag",
+          "columnName": "size_temp",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "size_temp",
+    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size_old 4\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column size_temp using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size_old 4\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "size_old 4",
+          "expression": "value",
+          "columnName": "size_old 4",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "size_old 3",
+          "expression": "value",
+          "columnName": "size_old 3",
+          "invert": true,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "size_temp",
+    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size_old 3\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column size_temp using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size_old 3\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "size_old 3",
+          "expression": "value",
+          "columnName": "size_old 3",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "size_old 2",
+          "expression": "value",
+          "columnName": "size_old 2",
+          "invert": true,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [],
+          "selectBlank": true,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "size_temp",
+    "expression": "jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size_old 2\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column size_temp using expression jython:import re\npattern =  r'\\d+(\\.\\d+)?\\s*[xX]\\s*\\d+(\\.\\d+)?(\\s*\\w*)*'\nvalue = cells[\"size_old 2\"][\"value\"]\nmatch = re.search(pattern,value)\nif value:\n   if match:\n      return value\n   else:\n      return None\nelse:\n  return None"
+  },
+  {
+    "op": "core/column-rename",
+    "oldColumnName": "size_temp",
+    "newColumnName": "size",
+    "description": "Rename column size_temp to size"
+  },
+  {
+    "op": "core/column-addition",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "baseColumnName": "size",
+    "expression": "grel:if(value.contains(';'),1,0)",
+    "onError": "set-to-blank",
+    "newColumnName": "composite_check",
+    "columnInsertIndex": 13,
+    "description": "Create column composite_check at index 13 based on column size using expression grel:if(value.contains(';'),1,0)"
+  },
+  {
+    "op": "core/column-removal",
+    "columnName": "size_old 1",
+    "description": "Remove column size_old 1"
+  },
+  {
+    "op": "core/column-removal",
+    "columnName": "size_old 2",
+    "description": "Remove column size_old 2"
+  },
+  {
+    "op": "core/column-removal",
+    "columnName": "size_old 3",
+    "description": "Remove column size_old 3"
+  },
+  {
+    "op": "core/column-removal",
+    "columnName": "size_old 4",
+    "description": "Remove column size_old 4"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "composite_check",
+          "expression": "value",
+          "columnName": "composite_check",
           "invert": false,
           "omitBlank": false,
           "omitError": false,
@@ -634,76 +819,24 @@
       "mode": "row-based"
     },
     "columnName": "size",
-    "expression": "jython:return cells[\"size_old\"][\"value\"]",
+    "expression": "jython:return value.replace(\"'\", \"\")",
     "onError": "keep-original",
     "repeat": false,
     "repeatCount": 10,
-    "description": "Text transform on cells in column size using expression jython:return cells[\"size_old\"][\"value\"]"
+    "description": "Text transform on cells in column size using expression jython:return value.replace(\"'\", \"\")"
   },
   {
-    "op": "core/mass-edit",
+    "op": "core/text-transform",
     "engineConfig": {
-      "facets": [
-        {
-          "type": "list",
-          "name": "size",
-          "expression": "value",
-          "columnName": "size",
-          "invert": false,
-          "omitBlank": false,
-          "omitError": false,
-          "selection": [
-            {
-              "v": {
-                "v": "4.75X7'",
-                "l": "4.75X7'"
-              }
-            }
-          ],
-          "selectBlank": false,
-          "selectError": false
-        }
-      ],
+      "facets": [],
       "mode": "row-based"
     },
     "columnName": "size",
-    "expression": "value",
-    "edits": [
-      {
-        "from": [
-          "4.75X7'"
-        ],
-        "fromBlank": false,
-        "fromError": false,
-        "to": "4.75X7"
-      }
-    ],
-    "description": "Mass edit cells in column size"
-  },
-  {
-    "op": "core/column-removal",
-    "columnName": "size_old",
-    "description": "Remove column size_old"
-  },
-  {
-    "op": "core/column-removal",
-    "columnName": "size 1",
-    "description": "Remove column size 1"
-  },
-  {
-    "op": "core/column-removal",
-    "columnName": "size 2",
-    "description": "Remove column size 2"
-  },
-  {
-    "op": "core/column-removal",
-    "columnName": "size 3",
-    "description": "Remove column size 3"
-  },
-  {
-    "op": "core/column-removal",
-    "columnName": "size 4",
-    "description": "Remove column size 4"
+    "expression": "value.trim()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column size using expression value.trim()"
   },
   {
     "op": "core/column-addition",
@@ -712,10 +845,10 @@
       "mode": "row-based"
     },
     "baseColumnName": "size",
-    "expression": "grel:if(value.contains(','),1,0)",
+    "expression": "jython:return len(value)",
     "onError": "set-to-blank",
-    "newColumnName": "punc_flag",
-    "columnInsertIndex": 8,
-    "description": "Create column punc_flag at index 8 based on column size using expression grel:if(value.contains(','),1,0)"
+    "newColumnName": "len_check",
+    "columnInsertIndex": 9,
+    "description": "Create column len_check at index 9 based on column size using expression jython:return len(value)"
   }
 ]
