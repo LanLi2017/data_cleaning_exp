@@ -61,7 +61,7 @@ def gen_ev(sample_dir, gt_init):
     
     return ev_matrix,merge_dfs
 
-def main():
+def ppl_dq_matrix():
     # Generate sample dataset
     # Process dataset in OpenRefine
     # Evaluate data output
@@ -82,6 +82,14 @@ def main():
     for f,merge_df in merge_dfs.items():
         filter_df = merge_df[columns_keep]
         filter_df.to_csv(f"{log_dq}/{f}", index=False)
+
+
+def main():
+    # The main task is to infer the relationship between:
+    # Diff(dx, dy) =<= Diff(rx, ry)
+    # More correct cell values, Why? --> dx: False, dy: True
+
+    pass
 
 
 if __name__ == '__main__':
