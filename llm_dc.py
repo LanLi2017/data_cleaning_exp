@@ -77,7 +77,7 @@ def generate(prompt, context, log_f):
         body = json.loads(line)
         response_part = body.get('response', '')
         # the response streams one token at a time, print that as we receive it
-        print(response_part, end='', flush=True)
+        # print(response_part, end='', flush=True)
         log_f.write(response_part)
 
         if 'error' in body:
@@ -113,17 +113,16 @@ def main():
     df_sampled = df_prep.sample(n=100, random_state=42) 
     
     # prompt I: dc_obj
-    zero_v = dc_obj
+    zero_v = {**dc_obj}
 
     # prompt II: dc_obj + example
-    exp_v = {**dc_obj, **example_repair}
+    exp_v =  {"example repair": example_repair}
+    exp_v.update(dc_obj)
 
     # prompt III: dc_obj + example repair + sample data
-    exp_samp_value = exp_v
+    exp_samp_value = {**exp_v}
     exp_samp_value['Sample cell values in target column']= list(df_sampled['physical_description'])
     
-    context = []
-    i = 0
     fp_prompts = {
         'zero_shot': [zero_v, ""],
         'exp': [exp_v, ""],
@@ -136,22 +135,23 @@ def main():
         #                  ]
     }
     for fp, prompts in fp_prompts.items():
-        log_f = open(f'llm_res/{fp}.txt', 'w')
-        i = 0
-        while i < len(prompts):
-            if i == len(prompts)-1:
-                user_input = "Write a python script to extract size information from this target column. \
-                            Dataset input: `menu.csv`. The target column name is `physical_description`.\
-                            Create a new column `size` as the expected results extracting the required \
-                            information."
+        with open(f'llm_res/{fp}.txt', 'w')as log_f:
+            i = 0
+            context = []
+            while i < len(prompts):
+                print(i)
+                if i == len(prompts)-1:
+                    user_input = "Write a python script to extract size information from this target column. \
+                                Dataset input: `menu.csv`. The target column name is `physical_description`.\
+                                Create a new column `size` as the expected results extracting the required \
+                                information."
 
-            else:
-                user_input = json.dumps(prompts[i])
-            print(user_input)
-            context = generate(user_input, context, log_f)
-            # log_f.write(str(context)+'\n')
-            print()
-            i += 1
+                else:
+                    user_input = json.dumps(prompts[i])
+                print(user_input)
+                context = generate(user_input, context, log_f)
+                print()
+                i += 1
 
 
 if __name__ == '__main__':

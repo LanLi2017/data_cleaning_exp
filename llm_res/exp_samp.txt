@@ -1,0 +1,58 @@
+The task is to extract the size information from a column of composite values expressing physical description of menus.
+
+From the given data, we can see that the size information is in the format "digit x digit" or "digit unit measurement (cm, inches)" with some additional keywords like "folded", "open", and "unit".
+
+Here's an example of how to extract the size information:
+
+1. For values like "CARD; ILLUS; COL; 4.25X6.5;", we can extract the size as "4.25 x 6.5".
+2. For values like "15x9cm folded; 15x18cm open", we can extract the size as "15 x 9 cm" and "15 x 18 cm".
+3. For values like "28x21.5cm", we can extract the size as "28 x 21.5 cm".
+
+Here's a Python code snippet to extract the size information:
+
+```python
+import re
+
+def extract_size(data):
+    pattern = r"(\d+(?:\.\d+)?(?: x \d+(?:\.\d+)?)*)"
+    sizes = []
+    for value in data.values():
+        match = re.search(pattern, str(value))
+        if match:
+            size = match.group(1).replace("fold. ; ill.", "").strip()
+            sizes.append(size)
+    return sizes
+
+data = {"example repair": {"8 x 5 in. fold. ; ill.": "8 x 5 in."}}
+print(extract_size(data))
+```
+
+This code uses the `re` module to search for patterns in the data values. The pattern is designed to match strings that contain digits, decimal points, and spaces, which are common in the size information. The function then extracts the matched string and strips out any unnecessary characters before returning a list of sizes.
+
+Note: This code assumes that the size information is always present in the format "digit x digit" or "digit unit measurement (cm, inches)" with some additional keywords like "folded", "open", and "unit". If there are cases where the size information is missing or in a different format, you may need to modify the code accordingly.Here's a Python script using pandas library that extracts the size information from the `physical_description` column in your CSV file and creates a new column `size` with the extracted sizes:
+
+```Python
+import pandas as pd
+
+# Load the menu.csv file into a pandas DataFrame
+df = pd.read_csv('menu.csv')
+
+# Define a function to extract the size information from the physical description
+def extract_size(description):
+    pattern = r"(\d+(?:\.\d+)?(?: x \d+(?:\.\d+)?)*)"
+    match = re.search(pattern, str(description))
+    if match:
+        return match.group(1).replace("fold.  ; ill.", "").strip()
+    else:
+        return ""
+
+# Apply the function to each row in the physical_description column
+df['size'] = df['physical_description'].apply(extract_size)
+
+# Print the updated DataFrame
+print(df)
+```
+
+This script assumes that your CSV file is named `menu.csv` and it's located in the same directory as your Python script. The `extract_size` function uses a regular expression to search for patterns like "8 x 5 in." or "28x21.5cm" in each row of the `physical_description` column, and returns the matched size information if found. If no match is found, it returns an empty string.
+
+After running this script, you should have a new column named `size` in your DataFrame with the extracted sizes.
