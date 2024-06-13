@@ -1,0 +1,83 @@
+A fascinating problem!
+
+Given the input data in the form of a column of composite values expressing physical description of menus, I'll outline the steps to extract size information from this target column `physical_description`.
+
+**Step 1: Parse the input data**
+
+Split each value in the `physical_description` column into individual components using whitespace or other delimiters. This will help us identify the different parts of the composite values.
+
+Example:
+```
+Input: "52x34cm"
+Parsed: ["52", "x", "34", "cm"]
+```
+
+**Step 2: Identify size information**
+
+Look for patterns in the parsed data that indicate size information. In this case, we're looking for:
+
+1. Singular values (e.g., "52") representing a single measurement.
+2. Composite values with multiplication operators (`x`) and key words indicating unit measurements (e.g., "cm", "inches").
+
+**Step 3: Extract size information**
+
+Using the parsed data and identified patterns, extract the size information from each value in the `physical_description` column.
+
+Example:
+```
+Input: ["52", "x", "34", "cm"]
+Extracted Size Information: 52 x 34 cm
+```
+
+**Step 4: Format the extracted size information**
+
+Present the extracted size information in a consistent format, such as:
+
+* For singular values: `digit x digit` (e.g., "52 x 34")
+* For composite values: `digit x digit unit measurement` (e.g., "52 x 34 cm")
+
+**Step 5: Output the extracted size information**
+
+Return the extracted size information for each value in the `physical_description` column.
+
+Example:
+```
+Output: ["52 x 34 cm"]
+```
+
+By following these steps, we can successfully extract size information from the target column `physical_description`.Here's a Python script using Pandas and regular expressions (regex) to extract size information from the `physical_description` column in the `menu.csv` dataset:
+```python
+import pandas as pd
+import re
+
+# Load the menu dataset
+df = pd.read_csv('menu.csv')
+
+# Define a function to extract size information
+def extract_size_info(text):
+    pattern = r'(\d+)x(\d+)(?:\s*(inches|cm))?$'
+    match = re.search(pattern, text)
+    if match:
+        return f"{match.group(1)} x {match.group(2)}"
+    else:
+        return None
+
+# Apply the function to the physical_description column
+df['size'] = df['physical_description'].apply(extract_size_info)
+
+# Print the updated dataframe
+print(df.head())
+```
+Here's how the script works:
+
+1. We load the `menu.csv` dataset into a Pandas DataFrame using `pd.read_csv`.
+2. We define a function `extract_size_info` that takes a string as input and returns the extracted size information.
+3. The function uses a regular expression pattern to search for the size information in the input string. The pattern matches:
+	* One or more digits (`\d+`) followed by an `x`
+	* Another one or more digits (`\d+`)
+	* Optionally, a unit measurement (either "inches" or "cm") separated by whitespace
+4. We apply the `extract_size_info` function to each value in the `physical_description` column using the `apply` method.
+5. The resulting values are stored in a new column called `size`.
+6. Finally, we print the updated DataFrame using `print(df.head())`.
+
+Note that this script assumes that the size information is always in the format `digit x digit [unit measurement]`. If your dataset has variations in formatting, you may need to adjust the regular expression pattern or add additional logic to handle these cases.

@@ -62,7 +62,8 @@ def phrase_detect(cell_values):
 
 def main():
     # Read csv
-    df = pd.read_csv("../data_input/menu.csv")
+    parent_folder = "history_update_problem"
+    df = pd.read_csv(f"{parent_folder}/data.in/menu_sp.csv")
     target_col = "physical_description"
 
     # Concatenate rows of values in a sequence 
