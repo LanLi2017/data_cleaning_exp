@@ -1,0 +1,115 @@
+The task is to extract the size information from a column of composite values expressing physical description of menus.
+
+From the given data, we can see that the size information is in the format "digit x digit" or "digit unit measurement (cm, inches)" with some additional keywords like "folded", "open", and "unit".
+
+Here's an example of how to extract the size information:
+
+1. For values like "CARD; ILLUS; COL; 4.25X6.5;", we can extract the size as "4.25 x 6.5".
+2. For values like "15x9cm folded; 15x18cm open", we can extract the size as "15 x 9 cm" and "15 x 18 cm".
+3. For values like "28x21.5cm", we can extract the size as "28 x 21.5 cm".
+
+Here's a Python code snippet to extract the size information:
+
+```python
+import re
+
+def extract_size(data):
+    pattern = r"(\d+(?:\.\d+)?(?: x \d+(?:\.\d+)?)*)"
+    sizes = []
+    for value in data.values():
+        match = re.search(pattern, str(value))
+        if match:
+            size = match.group(1).replace("fold. ; ill.", "").strip()
+            sizes.append(size)
+    return sizes
+
+data = {"example repair": {"8 x 5 in. fold. ; ill.": "8 x 5 in."}}
+print(extract_size(data))
+```
+
+This code uses the `re` module to search for patterns in the data values. The pattern is designed to match strings that contain digits, decimal points, and spaces, which are common in the size information. The function then extracts the matched string and strips out any unnecessary characters before returning a list of sizes.
+
+Note: This code assumes that the size information is always present in the format "digit x digit" or "digit unit measurement (cm, inches)" with some additional keywords like "folded", "open", and "unit". If there are cases where the size information is missing or in a different format, you may need to modify the code accordingly.This is a control vocabulary dictionary that maps keys to potential outliers. The idea is to replace any outlier values with the corresponding key.
+
+Here's a breakdown of each key-value pair:
+
+1. **folded**: This key has multiple value options, including:
+	* "folder", "Folder", "Folded", and "folded" (all correct spellings)
+	* "fold" and "unfolded" (related concepts)
+	* "folders" and "folds" (plural forms of the above)
+	* "trifolder" (a specific type of folder)
+
+If you encounter any of these values, replace them with the key "folded".
+
+2. **inches**: This key has multiple value options, including:
+	* "inches", "Inches", and "inhes" (correct spellings)
+	* "incnes" (a typo)
+	* "pieces" and "dishes" (unrelated concepts)
+
+If you encounter any of these values, replace them with the key "inches".
+
+3. **open**: This key has multiple value options, including:
+	* "opens", "open", and "opened" (correct spellings)
+	* "opn" and "opeen" (typos)
+	* "opens" is a verb form, while "open" is a state or action
+
+If you encounter any of these values, replace them with the key "open".
+
+4. **cm**: This key has multiple value options, including:
+	* "cm", "c", and "m" (correct abbreviations)
+	* "cmf" and "cmx" (typos)
+
+If you encounter any of these values, replace them with the key "cm".Here is a Python script that extracts size information from the `physical_description` column in the `menu.csv` dataset:
+```python
+import pandas as pd
+import re
+
+# Load the menu dataset
+df = pd.read_csv('menu.csv')
+
+# Define the target column and new column names
+target_column = 'physical_description'
+new_column = 'size'
+
+# Define the example repair dictionary (if provided)
+example_repair = {"8 x 5 in. fold. ; ill." : "8 x 5 in."}
+
+# Define the control vocabulary dictionary (if provided)
+control_vocabulary = {
+    "folded": ["folder", "Folder", "Folded", "folded", "fold", "unfolded", "folders", "folds", "trifolder"],
+    "inches": ["inches", "incnes", "pieces", "Inches", "inhes", "dishes"],
+    "open": ["opens", "open", "opn", "opeen", "opened"],
+    "cm": ["cm", "c", "m", "cmf", "cmx"]
+}
+
+# Define a function to standardize cell values
+def standardize_cell_value(value):
+    # Check if the value is in the example repair dictionary
+    if value in example_repair:
+        return example_repair[value]
+    
+    # Use regular expressions to extract size information
+    pattern = r"(\d+(?:\.\d+)?(?: x \d+(?:\.\d+)?)*)"
+    match = re.search(pattern, value)
+    if match:
+        return match.group(1).replace("fold. ; ill.", "").strip()
+    
+    # If no size information is found, return an empty string
+    return ""
+
+# Define a function to repair outliers using control vocabulary
+def repair_outliers(value):
+    for key, values in control_vocabulary.items():
+        if value in values:
+            return key
+    return value
+
+# Create the new column by applying the standardization and outlier repair functions
+df[new_column] = df[target_column].apply(standardize_cell_value).apply(repair_outliers)
+
+# Print the resulting dataset
+print(df)
+```
+This script assumes that the `menu.csv` file contains a single column named `physical_description`, which contains size information in various formats. The script uses regular expressions to extract size information from each cell value, and then applies the example repair dictionary and control vocabulary dictionary to standardize and repair any outliers.
+
+Note that you may need to modify the script if your dataset has different formatting or outlier values. Additionally, you can add more example repairs and control vocabulary dictionaries as needed.

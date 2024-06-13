@@ -4,6 +4,9 @@ import pandas as pd
 import json
 import requests
 import re
+import difflib
+
+from data_profiling.profiler import phrase_detect, word_occur
 
 model = "llama3"
 # model = 'stablelm-zephyr'
@@ -57,9 +60,36 @@ dc_obj = \
 #     for cell in cell_values:
 #         cells_prep.append(f'bos {cell} eos')
 #     return cells_prep
-def prep_profiler():
-    """Profile result"""
-    pass
+
+# Function to find closest match for a word in the primer list
+def find_closest_match(word, primer_list):
+    matches = difflib.get_close_matches(word, primer_list, n=1, cutoff=0.66)
+    if matches:
+        return matches[0]
+    return None
+
+
+def prep_profiler(df, target_col):
+    """Profile result
+    1. word and occurrances
+    2. phrase (2Gram)
+    #@primer: Sort the word_occur
+    #@Control vocab: A bag of outliers similar to primer
+    """
+    primers = ["cm", "inches", "folded", "open"]
+    # Count word occurance
+    word_count = word_occur(df[target_col])
+    words_list = list(word_count.keys())
+    
+    # Iterate over each word
+    outliers = {}
+    for word in words_list:
+        matched_primer = find_closest_match(word, primers)
+        if matched_primer:
+            if matched_primer not in outliers:
+                outliers[matched_primer] = []
+            outliers[matched_primer].append(word)
+    return outliers
 
 
 def generate(prompt, context, log_f):
@@ -107,8 +137,9 @@ def generate(prompt, context, log_f):
 
 def main():
     raw_data = 'pd_exp_prep/data_input/menu.csv'
+    target_col = 'physical_description'
     df = pd.read_csv(raw_data)
-    df_prep = df.dropna(subset=['physical_description'])
+    df_prep = df.dropna(subset=[target_col])
     # Sample 100 rows
     df_sampled = df_prep.sample(n=100, random_state=42) 
     
@@ -121,18 +152,22 @@ def main():
 
     # prompt III: dc_obj + example repair + sample data
     exp_samp_value = {**exp_v}
-    exp_samp_value['Sample cell values in target column']= list(df_sampled['physical_description'])
+    exp_samp_value['Sample cell values in target column']= list(df_sampled[target_col])
+
+    # prompt IV: dc_obj + example repair + sample data + profiler
+    prof_results = prep_profiler(df, target_col)
+    exp_samp_prof = {**exp_samp_value}
+    prof_intro = {"control vocabulary(key-[value] pairs) as following": \
+                  "key is the correct spelling, value is potential outliers. If encounter the outliers, replace value with the given key",
+                  **prof_results}
     
     fp_prompts = {
         'zero_shot': [zero_v, ""],
         'exp': [exp_v, ""],
         'exp_samp': [exp_samp_value,
                        ""]
-        #                ,
-        # 'prof_exp_samp': [  example_repair, \
-        #                     f"Sample cells values from target column:{df_sampled['physical_description']}",\
-        #                     ""
-        #                  ]
+                       ,
+        'prof_exp_samp': [exp_samp_prof, prof_intro, ""]
     }
     for fp, prompts in fp_prompts.items():
         with open(f'llm_res/{fp}.txt', 'w')as log_f:
@@ -143,8 +178,11 @@ def main():
                 if i == len(prompts)-1:
                     user_input = "Write a python script to extract size information from this target column. \
                                 Dataset input: `menu.csv`. The target column name is `physical_description`.\
-                                Create a new column `size` as the expected results extracting the required \
-                                information."
+                                Create a new column `size`: \
+                                1. Format the data according to requirement. \
+                                2. Learn from example repair (if provided) and create function to standardize cell value.\
+                                3. Generalize repairing methods according to provided sample cell values (if provided). \
+                                4. Using control vocabulary (if provided) to repair outliers."
 
                 else:
                     user_input = json.dumps(prompts[i])
@@ -155,4 +193,5 @@ def main():
 
 
 if __name__ == '__main__':
+    # try_prof()
     main()

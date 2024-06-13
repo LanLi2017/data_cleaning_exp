@@ -29,30 +29,44 @@ print(extract_size(data))
 
 This code uses the `re` module to search for patterns in the data values. The pattern is designed to match strings that contain digits, decimal points, and spaces, which are common in the size information. The function then extracts the matched string and strips out any unnecessary characters before returning a list of sizes.
 
-Note: This code assumes that the size information is always present in the format "digit x digit" or "digit unit measurement (cm, inches)" with some additional keywords like "folded", "open", and "unit". If there are cases where the size information is missing or in a different format, you may need to modify the code accordingly.Here's a Python script using pandas library that extracts the size information from the `physical_description` column in your CSV file and creates a new column `size` with the extracted sizes:
-
-```Python
+Note: This code assumes that the size information is always present in the format "digit x digit" or "digit unit measurement (cm, inches)" with some additional keywords like "folded", "open", and "unit". If there are cases where the size information is missing or in a different format, you may need to modify the code accordingly.Here is a Python script that extracts size information from the `physical_description` column in the `menu.csv` file:
+```python
 import pandas as pd
+import re
 
-# Load the menu.csv file into a pandas DataFrame
+# Load the menu dataset
 df = pd.read_csv('menu.csv')
 
-# Define a function to extract the size information from the physical description
-def extract_size(description):
-    pattern = r"(\d+(?:\.\d+)?(?: x \d+(?:\.\d+)?)*)"
-    match = re.search(pattern, str(description))
+# Define the target column and the new column to create
+target_column = 'physical_description'
+new_column = 'size'
+
+# Define a function to standardize cell values
+def standardize_cell_value(cell_value):
+    # Remove unnecessary characters (e.g. "fold.  ; ill.")
+    cell_value = re.sub(r'fold\.  ; ill\.', '', cell_value)
+    # Extract the size information using regular expressions
+    pattern = r'(\d+(?:\.\d+)?(?: x \d+(?:\.\d+)?)*)'
+    match = re.search(pattern, cell_value)
     if match:
-        return match.group(1).replace("fold.  ; ill.", "").strip()
+        return match.group(1).strip()
     else:
-        return ""
+        return None
 
-# Apply the function to each row in the physical_description column
-df['size'] = df['physical_description'].apply(extract_size)
+# Apply the standardization function to each cell value in the target column
+df[new_column] = df[target_column].apply(standardize_cell_value)
 
-# Print the updated DataFrame
+# Print the resulting dataframe with the new size column
 print(df)
 ```
+Here's how the script works:
 
-This script assumes that your CSV file is named `menu.csv` and it's located in the same directory as your Python script. The `extract_size` function uses a regular expression to search for patterns like "8 x 5 in." or "28x21.5cm" in each row of the `physical_description` column, and returns the matched size information if found. If no match is found, it returns an empty string.
+1. It loads the `menu.csv` file into a Pandas DataFrame using `pd.read_csv`.
+2. It defines the target column (`physical_description`) and the new column to create (`size`).
+3. The `standardize_cell_value` function is defined to standardize each cell value in the target column. This function:
+	* Removes unnecessary characters (e.g. "fold.  ; ill.") using regular expressions.
+	* Extracts the size information using a regular expression pattern that matches strings containing digits, decimal points, and spaces.
+4. The script applies the `standardize_cell_value` function to each cell value in the target column using the `apply` method.
+5. The resulting DataFrame with the new `size` column is printed.
 
-After running this script, you should have a new column named `size` in your DataFrame with the extracted sizes.
+Note: This script assumes that the size information is always present in the format "digit x digit" or "digit unit measurement (cm, inches)" with some additional keywords like "folded", "open", and "unit". If there are cases where the size information is missing or in a different format, you may need to modify the script accordingly.

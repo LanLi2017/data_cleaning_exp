@@ -28,8 +28,8 @@ def word_occur(rows: pd.Series):
     # Create DataFrame from dictionary
     df = pd.DataFrame(list(word_counts_dict.items()), 
                       columns=['Occurrance', 'Frequency'])
-    df.to_csv("word_occur.csv")
-    return values_seq
+    df.to_csv("data_profiling/word_occur.csv")
+    return word_counts
 
 
 def preprocess(cell):
@@ -57,13 +57,14 @@ def phrase_detect(cell_values):
     # Create DataFrame from dictionary
     df = pd.DataFrame(list(phrase_counts_dict.items()), 
                       columns=['Occurrance', 'Frequency'])
-    df.to_csv("phrase_occur.csv")
+    df.to_csv("data_profiling/phrase_occur.csv")
+    return phrase_counts_dict
 
 
-def main():
+def main(df):
     # Read csv
-    parent_folder = "history_update_problem"
-    df = pd.read_csv(f"{parent_folder}/data.in/menu_sp.csv")
+    # parent_folder = "history_update_problem"
+    # df = pd.read_csv(f"{parent_folder}/data.in/menu_sp.csv")
     target_col = "physical_description"
 
     # Concatenate rows of values in a sequence 

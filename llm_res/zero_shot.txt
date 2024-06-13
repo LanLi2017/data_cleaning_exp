@@ -45,39 +45,48 @@ Example:
 Output: ["52 x 34 cm"]
 ```
 
-By following these steps, we can successfully extract size information from the target column `physical_description`.Here's a Python script using Pandas and regular expressions (regex) to extract size information from the `physical_description` column in your `menu.csv` dataset:
+By following these steps, we can successfully extract size information from the target column `physical_description`.Here's a Python script using the `pandas` library to extract size information from the target column `physical_description` in the `menu.csv` dataset:
 ```python
 import pandas as pd
-import re
 
 # Load the menu dataset
 df = pd.read_csv('menu.csv')
 
-# Define a function to extract size information
-def extract_size_info(text):
-    pattern = r'(\d+)x(\d+)(?:\s*(inches|cm))?$'
-    match = re.search(pattern, text)
-    if match:
-        return f"{match.group(1)} x {match.group(2)}"
+# Define a function to standardize cell values
+def standardize_cell_value(cell):
+    # Split the cell value into individual components
+    components = cell.split()
+    
+    # Check if the cell value is in the format "digit x digit unit measurement"
+    if len(components) == 3 and components[1] == 'x':
+        return f"{components[0]} x {components[2]}"
     else:
-        return None
+        return cell
 
-# Apply the function to the physical_description column
+# Define a function to extract size information
+def extract_size_info(cell):
+    # Standardize the cell value using the standardize_cell_value function
+    standardized_cell = standardize_cell_value(cell)
+    
+    # Extract the size information from the standardized cell value
+    if 'x' in standardized_cell:
+        size_info = standardized_cell.split(' x ')[0] + ' x ' + standardized_cell.split(' x ')[2]
+    else:
+        size_info = standardized_cell
+    
+    return size_info
+
+# Create a new column 'size' and populate it with the extracted size information
 df['size'] = df['physical_description'].apply(extract_size_info)
 
 # Print the updated dataframe
-print(df.head())
+print(df)
 ```
 Here's how the script works:
 
 1. We load the `menu.csv` dataset into a Pandas DataFrame using `pd.read_csv`.
-2. We define a function `extract_size_info` that takes a string as input and returns the extracted size information.
-3. The function uses a regular expression pattern to search for size information in the input string. The pattern matches:
-	* One or more digits (`\d+`) followed by an `x`
-	* Another one or more digits (`\d+`)
-	* Optionally, a unit measurement (either "inches" or "cm") separated by whitespace
-4. We apply the `extract_size_info` function to each value in the `physical_description` column using the `apply` method.
-5. The resulting values are stored in a new column called `size`.
-6. Finally, we print the updated DataFrame using `print(df.head())`.
+2. We define two functions: `standardize_cell_value` and `extract_size_info`. The first function takes a cell value as input, splits it into individual components, and returns the standardized cell value in the required format. The second function takes a cell value as input, standardizes it using the first function, and extracts the size information from the standardized cell value.
+3. We create a new column `size` in the DataFrame and populate it with the extracted size information using the `apply` method.
+4. Finally, we print the updated DataFrame to see the extracted size information.
 
-Note that this script assumes that the size information is always in the format `digit x digit [unit measurement]`. If your dataset has variations in formatting, you may need to adjust the regular expression pattern or add additional logic to handle these cases.
+Note that this script assumes that the `physical_description` column contains values in the format "digit x digit unit measurement" or a single value representing a singular measurement. If your dataset has different formats or outliers, you may need to modify the script accordingly.
