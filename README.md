@@ -4,7 +4,8 @@
 3. Reusable Data Cleaning Framework -->
 
 ## History Update Problem
-Experiment I:
+Experiment I: OpenRefine Data Cleaning Process
+Generate Six versions of Data Cleaning Processes
 - [Process Document](history_update_problem/openrefine_recipes_gen.md)
 
 Experiment II:
