@@ -13,7 +13,7 @@ def gen_sample():
     # Sample 1000 rows
     df = prep_df.sample(n=100, random_state=42)
     # NO RERUN
-    df.to_csv("history_update_problem/data.inpu/menu_sp.csv", index=False)
+    df.to_csv("history_update_problem/data.input/menu_sp.csv", index=False)
 
 
 def gen_ev(sample_dir, gt_init):
@@ -61,7 +61,7 @@ def gen_ev(sample_dir, gt_init):
     
     return ev_matrix,merge_dfs
 
-def ppl_dq_matrix():
+def process_dq_matrix():
     # Generate sample dataset
     # Process dataset in OpenRefine
     # Evaluate data output
@@ -85,6 +85,7 @@ def ppl_dq_matrix():
 
 
 def main():
+    process_dq_matrix()
     # The main task is to infer the relationship between:
     # Diff(dx, dy) =<= Diff(rx, ry)
     # More correct cell values, Why? --> dx: False, dy: True
