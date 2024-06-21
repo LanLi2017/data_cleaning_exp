@@ -6,3 +6,7 @@
 ## History Update Problem
 Experiment I:
 - [Process Document](history_update_problem/openrefine_recipes_gen.md)
+
+Experiment II:
+- LLM-based workflow analysis 
+- Chain-of-Table Prompts
