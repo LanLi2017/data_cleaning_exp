@@ -1,0 +1,61 @@
+Use f_trans_column() to apply transformations and update the cell values in a target column. 
+
+The required arguments: columnName, expression. The expression could be GREL(General Refine Expression Language) or Python code (initialize with "jython").
+
+/*
+col : code | county | former province | area (km2) | population; census 2009 | capital
+row 1 : 1 | mombasa | coast | 212.5 | 939,370 | mombasa (city)
+row 2 : 2 | kwale | coast | 8,270.3 | 649,931 | kwale
+row 3 : 3 | kilifi | coast | 12,245.9 | 1,109,735 | kilifi
+*/
+Purpose: Figure out the place that has a population in 2009 higher than 500,000.
+The existing columns are: code, county, former province, area (km2), population; census 2009, capital.
+Explanation: We use GREL expression: toNumber() to transform the cell values from column "population; census 2009" into numerical type for further analysis.
+Therefore, the answer is: f_trans_column({"columnName": "population; census 2009", "expression": "value.toNumber()"}). The value: 939370 | 649311 | 1109735
+
+/*
+col : code | county | former province | area (km2) | population; census 2009 | capital
+row 1 : 1 | mombasA | coast | 212.5 | 939,370 | mombasa (city)
+row 2 : 2 | Kwale | coast | 8,270.3 | 649,931 | kwale
+row 3 : 3 | KILIFI| coast | 12,245.9 | 1,109,735 | kilifi
+*/
+Purpose: Figure out how many counties are recorded in total.
+The existing columns are: code, county, former province, area (km2), population; census 2009, capital.
+Explanation: cell values in column "county" are in different format, before grouping by and count the number, we need to make the format consistent by uppercase column "county".
+Therefore, the answer is: f_trans_column({"columnName": "county", "expression": "value.toUppercase()"}). The value: MOMBASA | KWALE | KILIFI
+
+/*
+col : id | room_type | last_review | reviews_per_month
+row 1 : 2384 | Private room | 11/12/18 | 2.92 
+row 2 : 15365 | Entire home/apt | 8/12/18 | 0.81
+row 3 : 17928 | Entire home/apt| 10/29/18 |  2.81
+*/
+Purpose: Figure out which month in 2018 got the hightest last review.
+The existing columns are:  id, room_type, last_review, reviews_per_month
+Explanation: cell values in column "last_review" are not in ISO format date.
+Therefore, the answer is: f_trans_column({"columnName": "last_revew", "expression": "value.toDate()"}). The value: 2018-11-12 | 2018-08-12 | 2018-10-29
+
+
+/*
+col : Year | Competition | Venue | Position | Notes
+row 1 : 1991 | European Junior Championships | Thessaloniki, Greece | 10th | 4.90 m
+row 2 : 1992 | World Junior Championships | Seoul, South Korea | 1st | 5.45 m
+row 3 : 1996 | European Indoor Championships | Stockholm, Sweden | 14th (q) | 5.45 m
+*/
+Purpose: who places 1st in 1991 or 1992
+The existing columns are: Year, Competition, Venue, Position, Notes.
+Explanation: target columns that are related to this purpose: Position and Year. Each row is about one competition result. We use regex to transform "Position" into numbers.
+Therefore, the answer is: f_trans_column({"columnName": "Position", "expression": "jython:import re\n pattern = re.compile(r'^\d+')\nmatch = pattern.match(value)\nif match:\n  value = match.group(0)\n  return value"}). The value: 10 | 1 | 14
+
+
+/*
+col : Year | Competition | Venue | Position | Notes
+row 1 : 1991 | European Junior Championships | Thessaloniki, Greece | 10th | 4.90 m
+row 2 : 1992 | World Junior Championships | Seoul, South Korea | 1st | 5.45 m
+row 3 : 1996 | European Indoor Championships | Stockholm, Sweden | 14th (q) | 5.45 m
+*/
+Purpose: who places 1st in 1991 or 1992
+The existing columns are: Year, Competition, Venue, Position, Notes.
+Explanation: target columns that are related to this purpose: Position and Year. Each row is about one competition result. We use regex to transform "Position" into numbers.
+Therefore, the answer is: f_trans_column({"columnName": "Position", "expression": "jython:import re\n pattern = re.compile(r'^\d+')\nmatch = pattern.match(value)\nif match:\n  value = match.group(0)\n  return value"}). The value: 10 | 1 | 14
+
