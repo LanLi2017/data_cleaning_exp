@@ -192,6 +192,16 @@ def main():
                 i += 1
 
 
+def llm_read_py():
+    user_input = "Read python script calling OpenRefine API to do data cleaning, the file path is \
+    OpenRefineClientPy3/google_refine/refine.py."
+    context = []
+    with open('llm_res/read_script.txt', 'w')as log_f:
+        user_input += "List all the operations that alter cell or column. Retrieve the python function names as well."
+        context = generate(user_input,context, log_f)
+
+
 if __name__ == '__main__':
     # try_prof()
-    main()
+    # main()
+    llm_read_py()
