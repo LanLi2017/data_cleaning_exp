@@ -13,15 +13,15 @@ Select target columns from the table according to informations in the Purpose an
   ]
 }
 */
-Purpose: Figure out if there are no cardiff wins that have a draw greater than 27.
+Purpose: What cardiff wins have a draw greater than 27?
 similar words link to columns :
-no cardiff wins -> cardiff win
+cardiff wins -> cardiff win
 a draw -> draw
 column value link to columns :
 27 -> draw
 semantic sentence link to columns :
 None
-The answer is : [cardiff win, draw]
+The answer is : cardiff win, draw
 
 /*
 {
@@ -37,15 +37,15 @@ The answer is : [cardiff win, draw]
   ]
 }
 */
-Purpose: Figure out if david lafata was the top goal scorer for the season 2010 - 2011.
+Purpose: Who was the top goal scorer for the season 2010 - 2011?
 similar words link to columns :
 season 2010 - 2011 -> season
 the top goal scorer -> top goalscorer
 column value link to columns :
 2010 - 2011 -> season
 semantic sentence link to columns :
-the top goal scorer for ... was david lafata -> top goalscorer
-The answer is : [season, top goalscorer]
+the top goal scorer ... -> top goalscorer
+The answer is : season, top goalscorer
 
 /*
 {
@@ -62,7 +62,7 @@ The answer is : [season, top goalscorer]
   ]
 }
 */
-Purpose: Figure out the year that the crew had a senior 2nd viii of som and senior iv of stm.
+Purpose: What is the year that the crew had a senior 2nd viii of som and senior iv of stm?
 similar words link to columns :
 the crew -> crew
 a senior 2nd viii of som -> senior 2nd viii
@@ -72,7 +72,7 @@ som -> senior 2nd viii
 stm -> senior iv
 semantic sentence link to columns :
 None
-The answer is : [crew, senior 2nd viii, senior iv]
+The answer is : crew, senior 2nd viii, senior iv
 
 /*
 {
@@ -91,7 +91,7 @@ The answer is : [crew, senior 2nd viii, senior iv]
   ]
 }
 */
-Purpose : Determine in game 74 against chicago , perkins had the most rebounds (9) and allen had the most points (22).
+Purpose : Who had the most rebounds and who had the most points in game 74 against chicago?
 similar words link to columns :
 the most rebounds -> high rebounds
 the most points -> high points
@@ -100,9 +100,9 @@ column value link to columns :
 74 -> game
 semantic sentence link to columns :
 2007 - 08 boston celtics season in game 74 against chicago -> team
-perkins had the most rebounds -> high rebounds
-allen had the most points -> high points
-The answer is : [game, team, high points, high rebounds]
+the most rebounds -> high rebounds
+the most points -> high points
+The answer is : game, team, high points, high rebounds
 
 /*
 {
@@ -120,7 +120,7 @@ The answer is : [game, team, high points, high rebounds]
   ]
 }
 */
-Purpose: Confirm that the record of the match was a 10 - 3 (1) score , resulting in a win in round 5 with a time of 5:00 minutes.
+Purpose: What is the match result that the record was a 10 - 3 (1) score in round 5 with a time of 5:00 minutes?
 similar words link to columns :
 the record of the match was a 10 - 3 (1) score -> record
 the record -> record
@@ -131,8 +131,8 @@ column value link to columns :
 5 -> round
 5:00 minutes -> time
 semantic sentence link to columns :
-resulting in a win -> res
-The answer is : [res, record, round, time]
+match result -> res
+The answer is : res, record, round, time
 
 /*
 {
@@ -147,7 +147,7 @@ The answer is : [res, record, round, time]
   ]
 }
 */
-Purpose: the remark on airline of dutch antilles express with fleet size over 4 is curacao second national carrier.
+Purpose: What is the remark on airline of dutch antilles express with fleet size over 4?
 similar words link to columns :
 the remark -> remarks
 on airline -> airline
@@ -155,10 +155,9 @@ fleet size -> fleet size
 column value link to columns :
 dutch antilles -> country
 4 -> fleet size
-curacao second national carrier -> remarks
 semantic sentence link to columns :
 None
-The answer is : [airline, fleet size, remarks]
+The answer is : airline, fleet size, remarks
 
 /*
 {
@@ -177,16 +176,17 @@ The answer is : [airline, fleet size, remarks]
   ]
 }
 */
-Purpose: on june 26th , 2010 kyle busch drove a total of 211.6 miles at an average speed of 110.673 miles per hour.
+Purpose: What the average speed of hour that kyle busch drove a total of 211.6 miles on june 26th , 2010?
 similar words link to columns :
 drove -> driver
+the average speed of hour -> average speed (mph)
 column value link to columns :
 june 26th , 2010 -> date, year
 a total of 211.6 miles -> -
 semantic sentence link to columns :
 kyle busch drove -> driver
-an average speed of 110.673 miles per hour -> average speed (mph)
-The answer is : [year, date, driver, -, average speed (mph)]
+None
+The answer is : year, date, driver, -, average speed (mph)
 
 /*
 {
@@ -203,15 +203,13 @@ The answer is : [year, date, driver, -, average speed (mph)]
   ]
 }
 */
-Purpose : sydney scored the same amount of points in the first game of the 2000 afl ansett australia cup as their opponent did in their second.
+Purpose : Who scored the same amount of points in the first game of the 2000 afl ansett australia cup as their opponent did in their second?
 similar words link to columns :
 scored -> away team score, home team score
-column value link to columns :
-sydney -> away team, home team
 semantic sentence link to columns :
 their opponent -> home team, away team
 scored the same amount of points -> away team score, home team score
 first game -> date
 their second -> date
 sydney scored -> home team, away team, home team score, away team score
-The answer is : [away team, home team, away team score, home team score, date]
+The answer is : away team, home team, away team score, home team score, date

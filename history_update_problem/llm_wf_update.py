@@ -1,61 +1,209 @@
 # LLM-based history update solution
 import argparse
+import ast
 import requests
 import json
 
 import pandas as pd
 
+# from history_update_problem.call_or import export_rows
+from call_or import export_rows
+
 
 model = "llama3"
-parser = argparse.ArgumentParser()
-parser.add_argument("--start", required=True, type=int)
-parser.add_argument("--end", required=True, type=int)
-parser.add_argument("--dry_run", default=False, action="store_true",
-    help="whether it's a dry run or real run.")
-parser.add_argument(
-    "--temperature", type=float, default=0.7,
-    help="temperature of 0 implies greedy sampling.")
+# parser = argparse.ArgumentParser()
+# parser.add_argument("--start", required=True, type=int)
+# parser.add_argument("--end", required=True, type=int)
+# parser.add_argument("--dry_run", default=False, action="store_true",
+#     help="whether it's a dry run or real run.")
+# parser.add_argument(
+#     "--temperature", type=float, default=0.7,
+#     help="temperature of 0 implies greedy sampling.")
 # simple case: How many types of event in the menu table?
-# 0. LLM learn generate chain of data operations as a data cleaning workflow
-init_demo = """
-Here are examples of using the operations to address data cleaning purpose.
-/*
-col : Week | When | Kickoff | Opponent | Results; Final score | Results; Team record | Game site | Attendance
-row 1 : 1 | Saturday, April 13 | 7:00 p.m. | at Rhein Fire | W 27–21 | 1–0 | Rheinstadion | 32,092
-row 2 : 2 | Saturday, April 20 | 7:00 p.m. | London Monarchs | W 37–3 | 2–0 | Waldstadion | 34,186
-row 3 : 3 | Sunday, April 28 | 6:00 p.m. | at Barcelona Dragons | W 33–29 | 3–0 | Estadi Olímpic de Montjuïc | 17,503
-*/
-Purpose: what is the date of the competition with top 5 highest attendance?
-Function Chain: f_add_column(Attendance number, f_row[*]) -> f_split_column(When, f_row[*]) -> f_sort_column(Attendance number, f_row[*]) ->  -> <END>
+prep_learning = """
+Here is a python script calling OpenRefine API to do the data cleaning, multiple functions/transformations are defined. 
+Python code:
+
+class RefineProject:
+    def text_transform(project_id, column, expression,on_error='set-to-blank', repeat=False, repeat_count=10):
+        '''
+        OpenRefine's transformations can change {{column}} contents by applying {{expression}}:
+        The default is GREL (General Refine Expression Language), Altertively, it accept python code.
+        Example: text_transform(project_id, column="id", expression="return int(value)") 
+        Using python code to transform values in column id as integer. 
+        '''
+        response = self.do_json('text-transform',
+                                {
+                                    'columnName': column,
+                                    'expression': expression,
+                                    'onError': on_error,
+                                    'repeat': repeat,
+                                    'repeatCount': repeat_count,
+                                })
+        return response
+
+    def edit(project_id, column, edit_from, edit_to):
+        '''
+        edit performs as value replacement, replace old value as {{edit_from}} with new value: {{edit_to}}
+        '''
+        edits = [{'from': [edit_from], 'to': edit_to}]
+        return self.mass_edit(column, edits)
+
+    def mass_edit(project_id, column, edits, expression='value'):
+        '''
+        Replacing data values with new values in {{column}} with new values, old and new values are defined in {{edits}}
+        Example: 
+        mass_edit(project_id, "city", edit_from="Cicago", edit_to="Chicago")
+        Replace cell values in column city from spelling "Cicago" to "Chicago"
+        '''
+        edits = json.dumps(edits)
+        response = self.do_json('mass-edit',
+                                {
+                                    'columnName': column, 'expression': expression, 'edits': edits})
+        return response
+    
+    # Default clustering options:
+    clusterer_defaults = {
+        'binning': {
+            'type': 'binning',
+            'function': 'fingerprint',
+            'params': {},
+        },
+        'knn': {
+            'type': 'knn',
+            'function': 'levenshtein',
+            'params': {
+                'radius': 1,
+                'blocking-ngram-size': 6,
+            },
+        },
+    }
+
+    def compute_clusters(project_id, column, clusterer_type='binning', function=None, params=None):
+        '''
+        Returns a list of clusters of {'value': ..., 'count': ...}.
+        Example:
+        compute_clusters(project_id, 'event', 'knn','levenshtein',params='{"radius":2, "blocking-ngram-size":4}')
+        Explain: apply cluster method: knn, cluster function: levenshtein, params:..., to column event. 
+        Return: Edits that are availble to choose, and then apply {{mass_edit()}} to replace the old values with new values.
+        '''
+        clusterer = self.clusterer_defaults[clusterer_type]
+        if params is not None:
+            clusterer['params'] = params
+        if function is not None:
+            clusterer['function'] = function
+        clusterer['column'] = column
+        response = self.do_json('compute-clusters', {
+            'clusterer': json.dumps(clusterer)}, )
+        return [
+            [
+                {'value': x['v'], 'count': x['c']}
+                for x in cluster
+            ]
+            for cluster in response
+        ]
+
+    def add_column(project_id, column, new_column, expression='jython:return value', column_insert_index=None,
+                   on_error='set-to-blank'):
+        '''Add a new column named as {{new_column}} based on {{expression}}. if the expression is default, then copy-paste cell values from {{column}} to {{new_column}}
+        using jython: followed the code if the expression is written in python.
+        Example: add_column(project_id, "name", "full name", expression="jython:res=cells['first name'].value+','+cells['last name'].value\nreturn res" )'''
+        if column_insert_index is None:
+            column_insert_index = self.column_order[column] + 1
+        response = self.do_json('add-column',
+                                {
+                                    'baseColumnName': column,
+                                    'newColumnName': new_column,
+                                    'expression': expression,
+                                    'columnInsertIndex': column_insert_index,
+                                    'onError': on_error})
+        self.get_models()
+        return response
+
+    def split_column(project_id,column,separator=',',mode='separator',regex=False,guess_cell_type=True,remove_original_column=False):
+        '''split {{column}} by {{separator}} to generate more new columns
+        Example: split_column(project_id, "full_name", "," )
+        Explain: cell values in column full_name are composite values{{first name, last name}} concatenated with ',', splitting column and we can extract
+        first name and last name as the new columns.'''
+        response = self.do_json('split-column',
+                                {
+                                    'columnName': column,
+                                    'separator': separator,
+                                    'mode': mode,
+                                    'regex': regex,
+                                    'guessCellType': guess_cell_type,
+                                    'removeOriginalColumn': remove_original_column,
+                                })
+        self.get_models()
+        return response
+
+    def rename_column(project_id, column, new_column):
+        '''Give old {{column}} name a more meaningful {{new_column}} name.
+        Example: rename_column(project_id, 'column 1', 'city')
+        Explain: the old column name {{column 1}} is updated as {{city}}, which becomes more meaningful.'''
+        response = self.do_json('rename-column',
+                                {
+                                    'oldColumnName': column,
+                                    'newColumnName': new_column,
+                                })
+        self.get_models()
+        return response
+        
+    def remove_column(project_id, column):
+        '''remove {{column}} if it is useless or of low quality, e.g., most cells are empty and cannot be inferred.
+        Example: remove_column(project_id, 'currency')
+        Explain: most of the cells in column {{currency}} are NA, so we remove this column.'''
+        response = self.do_json('remove-column', {'columnName': column})
+        self.get_models()
+        return response
 """
-plan_select_column_demo = '''If the table only needs a few columns to answer the question, we use f_select_column() to select these columns for it. For example,
+exp_in_out = """
+Data input before data cleaning:
 /*
-col : Code | County | Former Province | Area (km2) | Population | Capital
-row 1 : 1 | Mombasa | Coast | 212.5 | 939,370 | Mombasa (City)
-row 2 : 2 | Kwale | Coast | 8,270.3 | 649,931 | Kwale
-row 3 : 3 | Kilifi | Coast | 12,245.9 | 1,109,735 | Kilifi
+col : physical_description 
+row 1 : CARD; 4.75X7.5;
+row 2 : BROADSIDE; ILLUS; COL; 5.5X8.50; 
+row 3 : BROADSIDE; ILLUS; COL; 3,5X7;
+row 4 : CARD;ILLUS;5.25X8/25;
+row 5 : 30x21cm folded; 30x42cm open
+row 6 : CARD; ILLUS; 6 x 9.75 in.
+row 7 : Booklet; 8.25 x 11.5 inches
 */
-Question: what is the total number of counties with a population higher than 500000?
-Function: f_select_column(County, Population)
-Explanation: The question asks about the number of counties with a population higher than 500,000. We need to know the county and its population. We select column "County" and column "Population".'''
 
-plan_add_column_demo = '''To answer the question, we can first use f_add_column() to add more columns by applying transformations, similar to f_trans_column() to the table.
+Expected data output after data cleaning:
+/*
+col : physical_description               | size              | unit
+row 1 : CARD; 4.75X7.5;                  | 4.75X7.5          | 
+row 2 : BROADSIDE; ILLUS; COL; 5.5X8.50; | 5.5X8.50          |
+row 3 : BROADSIDE; ILLUS; COL; 3,5X7;    | 3.5X7             |      
+row 4 : CARD;ILLUS;5.25X8/25;            | 5.25X8.25         |
+row 5 : 30x21cm folded; 30x42cm open     | 30x21; 30x42      | cm
+row 6 : CARD; ILLUS; 6 x 9.75 in.        | 6 x 9.75          | inches
+row 7 : Booklet; 8.25 x 11.5 inches      | 8.25 x 11.5       | inches
+*/
+"""
+map_ops_func = {
+"core/column-split":,
+"core/column-addition":,
 
-    /*
-    col : week | when | kickoff | opponent | results; final score | results; team record | game site | attendance
-    row 1 : 1 | saturday, april 13 | 7:00 p.m. | at rhein fire | w 27–21 | 1–0 | rheinstadion | 32,092
-    row 2 : 2 | saturday, april 20 | 7:00 p.m. | london monarchs | w 37–3 | 2–0 | waldstadion | 34,186
-    row 3 : 3 | sunday, april 28 | 6:00 p.m. | at barcelona dragons | w 33–29 | 3–0 | estadi olímpic de montjuïc | 17,503
-    */
-    Purpose: Return top 5 competitions that have the most attendance.
-    Function: f_add_column(attendance number, f_row[*])
-    Explanation: We copy the value from column "attendance" and create a new column "attendance number" for each row: f_row[*].
-    '''
 
 
-def format_sel_col(fp):
+
+}
+
+def export_intermediate_tb(project_id):
+    # Call API to retrieve intermediate table
+    rows = []
+    csv_reader = export_rows(project_id)
+    for row in csv_reader:
+        rows.append(row)
+    df = pd.DataFrame(rows)
+    return df
+
+
+def format_sel_col(df):
     table_caption = "A mix of simple bibliographic description of the menus"
-    df = pd.read_csv(fp)
+    # df = pd.read_csv(fp)
     columns = df.columns.tolist() # column schema information 
     col_priority = []
     for col in df.columns:
@@ -72,9 +220,14 @@ def format_sel_col(fp):
     }
 
 
-def gen_table_str(fp):
+def gen_table_str(fp, col_sel_res):
+    with open(col_sel_res, 'r') as file:
+        column_string = file.read().strip()  # Read the content and remove any surrounding whitespace/newlines
+    # Split the string by commas to get a list of column names
+    target_cols = [col.strip() for col in column_string.split(',')]
+    print(f"target columns: {target_cols}")
     # generate sample table string as the task input [intermediate table]
-    df = pd.read_csv(fp, index_col=None)
+    df = pd.read_csv(fp, index_col=None)[target_cols]
     # Sample the first 30 rows
     df = df.head(30)
     # Prepend "row n:" to each row
@@ -90,11 +243,6 @@ def gen_table_str(fp):
     return table_str
 
 
-def gen_arguments():
-    
-    pass
-
-
 def generate(prompt, context, log_f):
     r = requests.post('http://localhost:11434/api/generate',
                       json={
@@ -105,68 +253,91 @@ def generate(prompt, context, log_f):
                       },
                       stream=True)
     r.raise_for_status()
-
+    
+    res = []
     for line in r.iter_lines():
         body = json.loads(line)
         response_part = body.get('response', '')
         # the response streams one token at a time, print that as we receive it
         # print(response_part, end='', flush=True)
+        res.append(response_part)
         log_f.write(response_part)
 
         if 'error' in body:
             raise Exception(body['error'])
 
         if body.get('done', False):
-            return body['context']
+            return body['context'], ''.join(res)
         
 
 if __name__ == "__main__":
-    dc_obj = "what's the most occurred page count for the menus?"
-    fpath = "data.in/menu_llm.csv"
+    # Define EOD: End of Data Cleaning
+    # Input:intermediate table; Example output format
+    # Output: False/True
+    __eod = """ 
+            Return True or False ONLY. NO EXPLANATIONS.
+            Return True: If NO data preparation is needed anymore on the intermediate table: data values are in high quality 
+            (similar to {{Expected data output after data cleaning}}). 
+            Otherwise, Return False.
+             """
+    dc_obj = """ 
+             The task is to figure out how the size of menus evolves over the decades. 
+             For this task, you will use {{menu}} dataset from NYPL(New York Public Library). 
+             Dataset Description: {{A mix of simple bibliographic description of the menus}},
+             The relevant columns input: {{physical_description}}
+             """
+    log_f = open("CoT.response/llm_dcw.txt", "w")
+    # fpath = "data.in/menu_llm.csv"
     ops = [] # operation history 
+    project_id = 2681949500112
+    eod_flag = "False" # Initialize Flag for "end of data cleaning" as False
     
-    flag_ops = {
-        "add_col": False,
-        "E": False,
-        # "split_col":False,
-        # "rename_col":False,
-        # "transform_col":False,
-        # "sort_col":False,
-    }
-    # facet/select_row should be an argument for all the operations 
-    context = []
-    prompt = init_demo + '\n'
-    with open(f'CoT.response/llm_dcw.txt', 'w')as log_f:
-            # 1. LLM predict next operation: five op-demo and chain-of ops 
-            fname = "menu_llm.csv"
-            data_input = gen_table_str(fpath) # generate intermediate table (T)
-            # TASK I: select target column(s)
-            with open("prompts/f_select_column.txt", 'r')as f:
-                sel_col_learn = f.read()
-            prompt += "Learn how to select columns based on given question:\n" + sel_col_learn
-            sel_col_tb = format_sel_col(fpath)
-            prompt += "Table input:\n" + json.dumps(sel_col_tb)
-            prompt += f"Purpose I: {dc_obj} \n"
-            prompt += f"Please infer the column(s) that is related to the Purpose I (No explanatins, only the column name(s))"
-            prompt += "The answer is : \n"
-            context = generate(prompt, context, log_f)
-    
+    while eod_flag == "False":
+        context = []
+        # The eod_flag is True.
+        # Return current intermediate table
+        df = export_intermediate_tb(project_id)
 
-    # TASK II: get_certain_columns(table_str: str, columns: list[str])
-    # while not flag_ops['E']:
-        #   prompt += "Intermediate Table:\n" + data_input
-        #   prompt += f"Chain of operation history has been applied: {ops} ->\n"
-        #   prompt += f"Data cleaning purpose: {dc_obj}"
-    #     prompt += "Learn operation add column:\n" + plan_add_column_demo
-        # prompt += "Learn operation split column:\n" + plan_split_column_demo
-        # prompt += "Learn operation rename column:\n" + plan_rename_column_demo
-        # prompt += "Learn operation transform column:\n" + plan_transform_column_demo
-        # prompt += "Learn operation sort column:\n" + plan_sort_column_demo
-        # prompt += "operations pool: add_col, split_col, rename_col, transform_col, sort_col, E \n"
-        # prompt += "choose one operation from the operations pool, and return the operation name"
-            
+        # 1. LLM predict next operation: five op-demo and chain-of ops 
+        # TASK I: select target column(s)
+        with open("prompts/f_select_column.txt", 'r')as f:
+            sel_col_learn = f.read()
+        prompt_sel_col = "Learn how to select columns based on given question:\n" + sel_col_learn
+        sel_col_tb = format_sel_col(df)
+        prompt_sel_col += "Table input:\n" + json.dumps(sel_col_tb)
+        prompt_sel_col += f"Data cleaning objective: {dc_obj}"
+        prompt_sel_col += "ONLY Return one or more column name(s) in a python list that are related to the {{Data cleaning objective}}.\
+                   No explanations or descriptions. e.g., ['column 1', 'column 2']"
+        context, sel_cols = generate(prompt_sel_col, context, log_f)
+        print(sel_cols)
+        cols_list = ast.literal_eval(sel_cols) 
 
-
+        # TASK II: select operations 
+        prompt_sel_ops += f"Chain of operation history has been applied: {ops} ->\n"
+        # prompt += "Intermediate Table:\n" + data_input
+        # prompt += f"Data cleaning purpose: {dc_obj}"
         
-        # 2. LLM generate required arguments 
-        # prompt += "Learn how to generate arguments for operation add column: \n" + 
+        # prompt += f"Generate a python script under the folder 'CoT.response', name it as table_{process_id}.py"
+        # process_id += 1
+
+        # TASK III: Call API process data
+
+
+        # Re-execute intermediate table
+        df = export_intermediate_tb(project_id)
+        # TASK IV:
+        # Keep passing intermediate table and data cleaning objective, until eod_flag is True. End the iteration.
+        iter_prompt = dc_obj + f""" intermediate table:{df} """\
+                            + exp_in_out \
+                            + __eod
+        context, eod_flag = generate(iter_prompt, context, log_f)
+        print(eod_flag)
+        break
+
+        # TASK II: get_certain_columns(table_str: str, columns: list[str])
+        
+        # process_id = 0
+
+
+    # prompt += "Learn how to generate arguments for operation add column: \n" + 
+    log_f.close()

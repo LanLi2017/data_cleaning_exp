@@ -102,10 +102,13 @@ def generate(prompt, context, log_f):
                       },
                       stream=True)
     r.raise_for_status()
-
+    
+    res = []
     for line in r.iter_lines():
         body = json.loads(line)
         response_part = body.get('response', '')
+
+        res.append(response_part)
         # the response streams one token at a time, print that as we receive it
         # print(response_part, end='', flush=True)
         log_f.write(response_part)
@@ -114,7 +117,7 @@ def generate(prompt, context, log_f):
             raise Exception(body['error'])
 
         if body.get('done', False):
-            return body['context']
+            return body['context'], ''.join(res)
 
 
 # def prompt_ppl():
@@ -187,8 +190,8 @@ def main():
                 else:
                     user_input = json.dumps(prompts[i])
                 print(user_input)
-                context = generate(user_input, context, log_f)
-                print()
+                context, ck = generate(user_input, context, log_f)
+                print(ck)
                 i += 1
 
 
@@ -197,8 +200,10 @@ def llm_read_py():
     OpenRefineClientPy3/google_refine/refine.py."
     context = []
     with open('llm_res/read_script.txt', 'w')as log_f:
-        user_input += "List all the operations that alter cell or column. Retrieve the python function names as well."
-        context = generate(user_input,context, log_f)
+        # user_input += "List all the operations that alter cell or column. Retrieve the python function names as well."
+        user_input += "Return True is it includes cell level operations, return False if not. No Explanation."
+        context, ck = generate(user_input,context, log_f)
+        print(ck)
 
 
 if __name__ == '__main__':
