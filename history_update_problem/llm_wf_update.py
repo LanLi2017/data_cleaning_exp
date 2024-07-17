@@ -7,7 +7,7 @@ import json
 import pandas as pd
 
 # from history_update_problem.call_or import export_rows
-from call_or import export_rows
+from call_or import *
 
 
 model = "llama3"
@@ -42,13 +42,6 @@ class RefineProject:
                                 })
         return response
 
-    def edit(project_id, column, edit_from, edit_to):
-        '''
-        edit performs as value replacement, replace old value as {{edit_from}} with new value: {{edit_to}}
-        '''
-        edits = [{'from': [edit_from], 'to': edit_to}]
-        return self.mass_edit(column, edits)
-
     def mass_edit(project_id, column, edits, expression='value'):
         '''
         Replacing data values with new values in {{column}} with new values, old and new values are defined in {{edits}}
@@ -61,47 +54,6 @@ class RefineProject:
                                 {
                                     'columnName': column, 'expression': expression, 'edits': edits})
         return response
-    
-    # Default clustering options:
-    clusterer_defaults = {
-        'binning': {
-            'type': 'binning',
-            'function': 'fingerprint',
-            'params': {},
-        },
-        'knn': {
-            'type': 'knn',
-            'function': 'levenshtein',
-            'params': {
-                'radius': 1,
-                'blocking-ngram-size': 6,
-            },
-        },
-    }
-
-    def compute_clusters(project_id, column, clusterer_type='binning', function=None, params=None):
-        '''
-        Returns a list of clusters of {'value': ..., 'count': ...}.
-        Example:
-        compute_clusters(project_id, 'event', 'knn','levenshtein',params='{"radius":2, "blocking-ngram-size":4}')
-        Explain: apply cluster method: knn, cluster function: levenshtein, params:..., to column event. 
-        Return: Edits that are availble to choose, and then apply {{mass_edit()}} to replace the old values with new values.
-        '''
-        clusterer = self.clusterer_defaults[clusterer_type]
-        if params is not None:
-            clusterer['params'] = params
-        if function is not None:
-            clusterer['function'] = function
-        clusterer['column'] = column
-        response = self.do_json('compute-clusters', {
-            'clusterer': json.dumps(clusterer)}, )
-        return [
-            [
-                {'value': x['v'], 'count': x['c']}
-                for x in cluster
-            ]
-            for cluster in response
-        ]
 
     def add_column(project_id, column, new_column, expression='jython:return value', column_insert_index=None,
                    on_error='set-to-blank'):
@@ -183,13 +135,14 @@ row 7 : Booklet; 8.25 x 11.5 inches      | 8.25 x 11.5       | inches
 */
 """
 map_ops_func = {
-"core/column-split":,
-"core/column-addition":,
-
-
-
-
+"core/column-split": split_column,
+"core/column-addition": add_column,
+"core/text-transform": text_transform,
+"core/mass-edit": mass_edit,
+"core/column-rename": rename_column,
+"core/column-removal": remove_column
 }
+
 
 def export_intermediate_tb(project_id):
     # Call API to retrieve intermediate table
@@ -306,17 +259,26 @@ if __name__ == "__main__":
         sel_col_tb = format_sel_col(df)
         prompt_sel_col += "Table input:\n" + json.dumps(sel_col_tb)
         prompt_sel_col += f"Data cleaning objective: {dc_obj}"
-        prompt_sel_col += "ONLY Return one or more column name(s) in a python list that are related to the {{Data cleaning objective}}.\
-                   No explanations or descriptions. e.g., ['column 1', 'column 2']"
+        prompt_sel_col += """Return relevant column name(s) in a python list based on {{Data cleaning objective}} ONLY. NO EXPLANATIONS.
+                             Example Return: ['column 1', 'column 2']"""
         context, sel_cols = generate(prompt_sel_col, context, log_f)
         print(sel_cols)
         cols_list = ast.literal_eval(sel_cols) 
 
         # TASK II: select operations 
-        prompt_sel_ops += f"Chain of operation history has been applied: {ops} ->\n"
-        # prompt += "Intermediate Table:\n" + data_input
-        # prompt += f"Data cleaning purpose: {dc_obj}"
+        prompt_sel_ops = "Learn available python functions to process data in class RefineProject:" + prep_learning
+        ops = get_operations(project_id)
+        op_list = [dict['op'] for dict in ops]
+        functions_list = [map_ops_func[operation].__name__ for operation in ops]
+        prompt_sel_ops += f"Chain of operation history has been applied: {functions_list} ->\n"
+        prompt_sel_ops += "Intermediate Table:\n" + df
+        prompt_sel_ops += f"Data cleaning purpose: {dc_obj}"
+        prompt_sel_ops += """To make the data in a good quality that fit for {{Data cleaning purpose}}, select one 
+                           function from RefineProject."""
         
+        context, sel_op = generate(prompt_sel_ops, context, log_f)
+        print(sel_op)
+
         # prompt += f"Generate a python script under the folder 'CoT.response', name it as table_{process_id}.py"
         # process_id += 1
 

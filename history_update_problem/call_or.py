@@ -284,9 +284,23 @@ def returnRetro_Description(project_id,op_index):
 
 
 def main():
+    map_ops_func = {
+    "core/column-split": split_column,
+    "core/column-addition": add_column,
+    "core/text-transform": text_transform,
+    "core/mass-edit": mass_edit,
+    "core/column-rename": rename_column,
+    "core/column-removal": remove_column
+    }
     project_id = 2681949500112
     res = get_operations(project_id)
-    print(res)
+    ops = []
+    for r in res:
+        ops.append(r['op'])
+
+    functions_list = [map_ops_func[operation].__name__ for operation in ops]
+    print(functions_list)
+
     # add_column(project_id, "event", "event_cleaned", expression="jython:res=cells['event'].value + ',' + cells['venue'].value\nreturn res")
 
     # add_column(project_id, "event", "event_cleaned", expression="res=cells['event'].value + ',' + cells['venue'].value\nreturn res")
