@@ -192,11 +192,11 @@ def star_row(project_id,row,starred=True):
     return refine.RefineProject(refine.RefineServer(),project_id).star_row(row,starred)
 
 
-def add_column(project_id,column,new_column,expression='value'):
+def add_column(project_id,column,new_column,expression):
     return refine.RefineProject(refine.RefineServer(),project_id).add_column(column,new_column,expression)
 
 
-def split_column(project_id,column,separator=',', mode='separator',regex=False,guess_cell_type=True,remove_original_column=False):
+def split_column(project_id,column,separator, mode='separator',regex=False,guess_cell_type=True,remove_original_column=False):
     return refine.RefineProject(refine.RefineServer(),project_id).split_column(column,separator,mode,regex,guess_cell_type,remove_original_column)
 
 

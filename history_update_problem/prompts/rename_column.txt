@@ -1,6 +1,6 @@
-We call f_rename_column() to revise the column schema.
+We call rename_column() to revise the column schema.
 
-The required arguments for f_rename_column() include: oldColumnName, newColumnName. Replace the old column name with new one for the table.
+The required arguments for rename_column() include: column, new_column. Replace the old column name with new one for the table.
 
 
 /*
@@ -12,4 +12,4 @@ row 3 : 3 | Kilifi | Coast | 12,245.9 | 1,109,735 | Kilifi
 Question: what is the total number of counties with a population in 2009 higher than 500,000?
 The existing columns are: Code, County, Former Province, Area (km2), Population; Census 2009, Capital.
 Explanation: the question asks about the number of counties with a population in 2009 higher than 500,000. Each row is about one county. We rename the column "Population; Census 2009" as "Population".
-Therefore, the answer is: f_rename_column({"oldColumnName":"Population; Census 2009", "newColumnName":"Population"}). The value: 939370 | 649311 | 1109735
+Therefore, the answer is: rename_column(column="Population; Census 2009", new_column="Population"). The value: 939370 | 649311 | 1109735

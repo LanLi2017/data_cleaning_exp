@@ -1,6 +1,10 @@
 # LLM-based history update solution
 import argparse
 import ast
+import importlib.util
+import inspect
+from types import ModuleType
+from typing import List
 import requests
 import json
 
@@ -25,7 +29,7 @@ Here is a python script calling OpenRefine API to do the data cleaning, multiple
 Python code:
 
 class RefineProject:
-    def text_transform(project_id, column, expression,on_error='set-to-blank', repeat=False, repeat_count=10):
+    def text_transform(project_id, column, expression):
         '''
         OpenRefine's transformations can change {{column}} contents by applying {{expression}}:
         The default is GREL (General Refine Expression Language), Altertively, it accept python code.
@@ -42,7 +46,7 @@ class RefineProject:
                                 })
         return response
 
-    def mass_edit(project_id, column, edits, expression='value'):
+    def mass_edit(project_id, column, edits):
         '''
         Replacing data values with new values in {{column}} with new values, old and new values are defined in {{edits}}
         Example: 
@@ -55,8 +59,7 @@ class RefineProject:
                                     'columnName': column, 'expression': expression, 'edits': edits})
         return response
 
-    def add_column(project_id, column, new_column, expression='jython:return value', column_insert_index=None,
-                   on_error='set-to-blank'):
+    def add_column(project_id, column, new_column, expression):
         '''Add a new column named as {{new_column}} based on {{expression}}. if the expression is default, then copy-paste cell values from {{column}} to {{new_column}}
         using jython: followed the code if the expression is written in python.
         Example: add_column(project_id, "name", "full name", expression="jython:res=cells['first name'].value+','+cells['last name'].value\nreturn res" )'''
@@ -72,7 +75,7 @@ class RefineProject:
         self.get_models()
         return response
 
-    def split_column(project_id,column,separator=',',mode='separator',regex=False,guess_cell_type=True,remove_original_column=False):
+    def split_column(project_id,column,separator):
         '''split {{column}} by {{separator}} to generate more new columns
         Example: split_column(project_id, "full_name", "," )
         Explain: cell values in column full_name are composite values{{first name, last name}} concatenated with ',', splitting column and we can extract
@@ -143,14 +146,25 @@ map_ops_func = {
 "core/column-removal": remove_column
 }
 
+# map_func_fname = {
+#     'split_column': 'prompts/split_column.txt' ,
+#     'add_column': 'prompts/add_column.txt',
+#     'text_transform': 'prompts/text_transform.txt',
+#     'mass_edit': 'prompts/mass_edit.txt',
+#     'rename_column':'prompts/rename_column.txt',
+#     'remove_column': 'prompts/remove_column.txt',
+# }
 
 def export_intermediate_tb(project_id):
     # Call API to retrieve intermediate table
     rows = []
     csv_reader = export_rows(project_id)
-    for row in csv_reader:
-        rows.append(row)
-    df = pd.DataFrame(rows)
+    rows = list(csv_reader)
+    columns = rows[0]
+    data = rows[1:]
+    # for row in csv_reader:
+    #     rows.append(row)
+    df = pd.DataFrame(data, columns=columns)
     return df
 
 
@@ -173,14 +187,7 @@ def format_sel_col(df):
     }
 
 
-def gen_table_str(fp, col_sel_res):
-    with open(col_sel_res, 'r') as file:
-        column_string = file.read().strip()  # Read the content and remove any surrounding whitespace/newlines
-    # Split the string by commas to get a list of column names
-    target_cols = [col.strip() for col in column_string.split(',')]
-    print(f"target columns: {target_cols}")
-    # generate sample table string as the task input [intermediate table]
-    df = pd.read_csv(fp, index_col=None)[target_cols]
+def gen_table_str(df):
     # Sample the first 30 rows
     df = df.head(30)
     # Prepend "row n:" to each row
@@ -196,13 +203,56 @@ def gen_table_str(fp, col_sel_res):
     return table_str
 
 
-def generate(prompt, context, log_f):
+
+def get_function_arguments(script_path: str, function_name: str) -> List[str]:
+    """
+    Get the arguments of a function from a given Python script.
+
+    Parameters:
+        script_path (str): Path to the Python script.
+        function_name (str): Name of the function to inspect.
+
+    Returns:
+        List[str]: List of argument names.
+    """
+    # Load the script as a module
+    spec = importlib.util.spec_from_file_location("module.name", script_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    
+    # Get the function object
+    func = getattr(module, function_name)
+    
+    # Get the function signature
+    sig = inspect.signature(func)
+    
+    # Extract argument names
+    args = [param.name for param in sig.parameters.values()
+            if param.default == inspect.Parameter.empty]
+    
+    return args
+
+def generate(prompt, context, log_f, temp=0):
+    """
+    Send a POST request to generate a response based on the provided prompt and context.
+
+    Parameters:
+        prompt (str): The input prompt for the generation.
+        context (str): The context to be used for the generation.
+        model (str): The model to be used for the generation. Defaults to 'default-model'.
+
+    Returns:
+        str: The context from the response if generation is done.
+
+    Raises:
+        Exception: If there is an error in the response.
+    """
     r = requests.post('http://localhost:11434/api/generate',
                       json={
                           'model': model,
                           'prompt': prompt,
                           'context': context,
-                          'options':{'temperature':0}
+                          'options':{'temperature': temp}
                       },
                       stream=True)
     r.raise_for_status()
@@ -269,30 +319,50 @@ if __name__ == "__main__":
         prompt_sel_ops = "Learn available python functions to process data in class RefineProject:" + prep_learning
         ops = get_operations(project_id)
         op_list = [dict['op'] for dict in ops]
-        functions_list = [map_ops_func[operation].__name__ for operation in ops]
+        functions_list = [map_ops_func[operation].__name__ for operation in op_list]
+        print(functions_list)
         prompt_sel_ops += f"Chain of operation history has been applied: {functions_list} ->\n"
-        prompt_sel_ops += "Intermediate Table:\n" + df
+        prompt_sel_ops += f"Sample first 30 rows from the Intermediate Table: {gen_table_str(df)} \n"
         prompt_sel_ops += f"Data cleaning purpose: {dc_obj}"
-        prompt_sel_ops += """To make the data in a good quality that fit for {{Data cleaning purpose}}, select one 
-                           function from RefineProject."""
+        prompt_sel_ops += """
+                           Return one selected function name from Functions Pool of RefineProject ONLY. NO EXPLANATIONS.
+                           Functions pool: split_column, add_column, text_transform, mass_edit, rename_column, remove_column.
+                           This task is to make the data in a good quality that fit for {{Data cleaning purpose}}."""
         
         context, sel_op = generate(prompt_sel_ops, context, log_f)
         print(sel_op)
 
-        # prompt += f"Generate a python script under the folder 'CoT.response', name it as table_{process_id}.py"
-        # process_id += 1
+        # TASK III: Learn operation arguments (share the same context with sel_op)
+        args = get_function_arguments('call_or.py', sel_op)
+        args.remove('project_id')  # No need to predict project_id
+        print(args)
+        print("===========")
+        prompt_sel_args = f"""Next predicted operation is {sel_op}"""
+        # prompt_sel_args += f"Sample first 30 rows from the Intermediate Table: {gen_table_str(df)} \n"
+        with open(f'prompts/{sel_op}.txt', 'r') as f1:
+            sel_args_learn = f1.read()
+        print(sel_args_learn)
+        prompt_sel_args += f"""Learn proper arguments based on intermediate table and data cleaning purpose:
+                                {sel_args_learn}"""
+        
+        prompt_sel_args += f"""
+                            Predict values for arguments in selected operation {sel_op}: {args}. 
+                            The answer is:
+                            """
+        context, sel_args = generate(prompt_sel_ops, context, log_f)
+        print(sel_args)
 
-        # TASK III: Call API process data
+        # TASK IV: Call API process data
 
 
         # Re-execute intermediate table
         df = export_intermediate_tb(project_id)
-        # TASK IV:
+        # TASK V:
         # Keep passing intermediate table and data cleaning objective, until eod_flag is True. End the iteration.
         iter_prompt = dc_obj + f""" intermediate table:{df} """\
                             + exp_in_out \
                             + __eod
-        context, eod_flag = generate(iter_prompt, context, log_f)
+        context, eod_flag = generate(iter_prompt, [], log_f)
         print(eod_flag)
         break
 

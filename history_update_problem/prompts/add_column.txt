@@ -1,6 +1,6 @@
-To answer the question, we can first use f_add_column() to add more columns by applying transformations, similar to f_trans_column() to the table.
+To answer the question, we can first use add_column() to add more columns by applying transformations.
 
-The required arguments for f_add_column() include: baseColumnName, expression, newColumnName. With expression defined, the new column could be based on copying pasting the original value from the base column, or using transformation to process and 
+The required arguments for add_column() include: column, new_column, expression. With expression defined, the new column could be based on copying pasting the original value from the base column, or using transformation to process and 
 append values to new column.
 
 /*
@@ -12,7 +12,7 @@ row 3 : 3 | sunday, april 28 | 6:00 p.m. | at barcelona dragons | w 33â€“29 | 3â
 Purpose: Return top 5 competitions that have the most attendance.
 The existing columns are: "week", "when", "kickoff", "opponent", "results; final score", "results; team record", "game site", "attendance".
 Explanation: We copy the value from column "attendance" and create a new column "attendance number" for each row.
-Therefore, the answer is: f_add_column({"baseColumnName": "attendance", expression:"value", "newColumnName":"attendance number"}). The value: 32,092 | 34,186 | 17,503
+Therefore, the answer is: add_column(column="attendance", expression="value", new_column="attendance number"). The value: 32,092 | 34,186 | 17,503
 
 
 /*
@@ -24,7 +24,7 @@ row 3 : 3 | sunday, april 28 | 6:00 p.m. | at barcelona dragons | w 33â€“29 | 3â
 Purpose: Figure out the date of the competition with highest attendance.
 The existing columns are: "week", "when", "kickoff", "opponent", "results; final score", "results; team record", "game site", "attendance".
 Explanation: We extract the value from column "when" and create a different column "date of competition" for each row.
-Therefore, the answer is: f_add_column({"baseColumnName": "when", expression:"value.split(",")[-1]", "newColumnName":"date of competition"}). The value: april 13 | april 20 | april 28
+Therefore, the answer is: add_column(column= "when", expression="value.split(",")[-1]", new_column="date of competition"). The value: april 13 | april 20 | april 28
 
 
 /*
@@ -36,4 +36,4 @@ row 3 :  | 3 | asami tanno     |  jpn    | 53.04
 Purpose: return the player information, including both name and country 
 The existing columns are: rank, lane, player, time.
 Explanation: We add a new column based on concatenating the value from column "player name" and "country" for each row.
-Therefore, the answer is: f_add_column({"baseColumnName": "player name", expression:"cells['player name'].value+ "-"+ cells['country'].value", "newColumnName":"player"}). The value: olga tereshkova-kaz | manjeet kaur-ind | asami tanno-jpn
+Therefore, the answer is: add_column(column="player name", expression="cells['player name'].value+ "-"+ cells['country'].value", new_column="player"). The value: olga tereshkova-kaz | manjeet kaur-ind | asami tanno-jpn
