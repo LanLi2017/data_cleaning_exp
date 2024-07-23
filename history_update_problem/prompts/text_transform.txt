@@ -1,6 +1,6 @@
 Use text_transform() to apply transformations and update the cell values in a target column. 
 
-The required arguments: column, expression. The expression could be GREL(General Refine Expression Language) or Python code (initialize with "jython").
+The required arguments: expression. The expression could be GREL(General Refine Expression Language) or Python code (initialize with "jython").
 
 /*
 col : code | county | former province | area (km2) | population; census 2009 | capital

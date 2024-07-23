@@ -1,6 +1,6 @@
 To answer the question, we can first use split_column() to decompose cell values with a separator and extract required columns to the table.
 
-The required arguments for split_column() include: column, separator. With the defined separator, splitting cells into multiple columns and removing the separator character or string you indicate. 
+The required arguments for split_column() include: separator. With the defined separator, splitting cells into multiple columns and removing the separator character or string you indicate. 
 
 
 /*

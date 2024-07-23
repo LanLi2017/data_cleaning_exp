@@ -1,6 +1,6 @@
 We call rename_column() to revise the column schema.
 
-The required arguments for rename_column() include: column, new_column. Replace the old column name with new one for the table.
+The required arguments for rename_column() include: new_column. Replace the old column name with new_column name for the table.
 
 
 /*

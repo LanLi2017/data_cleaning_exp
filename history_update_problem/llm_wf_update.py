@@ -49,8 +49,9 @@ class RefineProject:
     def mass_edit(project_id, column, edits):
         '''
         Replacing data values with new values in {{column}} with new values, old and new values are defined in {{edits}}
+        edits: [{'from': ['foo'], 'to': 'bar'}, {...}]
         Example: 
-        mass_edit(project_id, "city", edit_from="Cicago", edit_to="Chicago")
+        mass_edit(project_id, "city", edits=[{'from':["Cicago"], 'to':"Chicago"}])
         Replace cell values in column city from spelling "Cicago" to "Chicago"
         '''
         edits = json.dumps(edits)
@@ -203,6 +204,12 @@ def gen_table_str(df):
     return table_str
 
 
+def gen_col_str(df, col_name:str):
+    column_values = df[col_name].astype(str).tolist()
+    col_string = ' '.join(column_values)
+    
+    return col_string
+
 
 def get_function_arguments(script_path: str, function_name: str) -> List[str]:
     """
@@ -305,15 +312,15 @@ if __name__ == "__main__":
         # TASK I: select target column(s)
         with open("prompts/f_select_column.txt", 'r')as f:
             sel_col_learn = f.read()
-        prompt_sel_col = "Learn how to select columns based on given question:\n" + sel_col_learn
+        prompt_sel_col = "Learn how to select column based on given question:\n" + sel_col_learn
         sel_col_tb = format_sel_col(df)
         prompt_sel_col += "Table input:\n" + json.dumps(sel_col_tb)
         prompt_sel_col += f"Data cleaning objective: {dc_obj}"
-        prompt_sel_col += """Return relevant column name(s) in a python list based on {{Data cleaning objective}} ONLY. NO EXPLANATIONS.
-                             Example Return: ['column 1', 'column 2']"""
-        context, sel_cols = generate(prompt_sel_col, context, log_f)
-        print(sel_cols)
-        cols_list = ast.literal_eval(sel_cols) 
+        prompt_sel_col += """Step by step, Return one relevant column name(string) based on {{Data cleaning objective}} ONLY. NO EXPLANATIONS.
+                             Example Return: 'column 1' """
+        context, sel_col = generate(prompt_sel_col, context, log_f)
+        print(sel_col)
+        # cols_list = ast.literal_eval(sel_cols) 
 
         # TASK II: select operations 
         prompt_sel_ops = "Learn available python functions to process data in class RefineProject:" + prep_learning
@@ -322,7 +329,8 @@ if __name__ == "__main__":
         functions_list = [map_ops_func[operation].__name__ for operation in op_list]
         print(functions_list)
         prompt_sel_ops += f"Chain of operation history has been applied: {functions_list} ->\n"
-        prompt_sel_ops += f"Sample first 30 rows from the Intermediate Table: {gen_table_str(df)} \n"
+        # prompt_sel_ops += f"Sample first 30 rows from the Intermediate Table: {gen_table_str(df)} \n"
+        prompt_sel_ops += f"Data values in target column: {gen_col_str(df, sel_col)}"
         prompt_sel_ops += f"Data cleaning purpose: {dc_obj}"
         prompt_sel_ops += """
                            Return one selected function name from Functions Pool of RefineProject ONLY. NO EXPLANATIONS.
@@ -335,25 +343,49 @@ if __name__ == "__main__":
         # TASK III: Learn operation arguments (share the same context with sel_op)
         args = get_function_arguments('call_or.py', sel_op)
         args.remove('project_id')  # No need to predict project_id
-        print(args)
-        print("===========")
+        args.remove('column')
         prompt_sel_args = f"""Next predicted operation is {sel_op}"""
         # prompt_sel_args += f"Sample first 30 rows from the Intermediate Table: {gen_table_str(df)} \n"
         with open(f'prompts/{sel_op}.txt', 'r') as f1:
             sel_args_learn = f1.read()
-        print(sel_args_learn)
+        prompt_sel_args += f"""
+                            The purpose of applying operation is to make target column close to expected output.
+                            """
         prompt_sel_args += f"""Learn proper arguments based on intermediate table and data cleaning purpose:
                                 {sel_args_learn}"""
         
-        prompt_sel_args += f"""
-                            Predict values for arguments in selected operation {sel_op}: {args}. 
-                            The answer is:
-                            """
-        context, sel_args = generate(prompt_sel_ops, context, log_f)
-        print(sel_args)
-
+        if sel_op == 'split_column':
+            prompt_sel_args += f"""
+                                Therefore, the answer is: split_column(column={sel_col}, separator=?).
+                                Return value for question mark.
+                                """
+        elif sel_op == 'add_column':
+            prompt_sel_args += f"""
+                                Therefore, the answer is: add_column(column={sel_col}, expression=?, new_column=? ).
+                                Return value for question mark.
+                                """
+        elif sel_op == 'rename_column':
+            prompt_sel_args += f"""
+                                Therefore, the answer is: rename_column(column={sel_col}, new_column=?).
+                                Return value for question mark.
+                                """
+        elif sel_op == 'text_transform':
+            prompt_sel_args += f"""
+                                Therefore, the answer is: text_transform(column={sel_col}",expression=?). 
+                                Return value for question mark.
+                                """
+        elif sel_op == 'mass_edit':
+            prompt_sel_args += f"""
+                                Therefore, the answer is: text_transform(column={sel_col}",expression=?). 
+                                Return value for question mark.
+                                """
+        elif sel_op == 'remove_column':
+            prompt_sel_args += f"""
+                                Therefore, the answer is: remove_column(column={sel_col})
+                                """
+        context, sel_args = generate(prompt_sel_args, context, log_f)
+        print(f"selected arguments: {sel_args}")
         # TASK IV: Call API process data
-
 
         # Re-execute intermediate table
         df = export_intermediate_tb(project_id)
@@ -364,12 +396,7 @@ if __name__ == "__main__":
                             + __eod
         context, eod_flag = generate(iter_prompt, [], log_f)
         print(eod_flag)
-        break
-
-        # TASK II: get_certain_columns(table_str: str, columns: list[str])
-        
-        # process_id = 0
-
+        break 
 
     # prompt += "Learn how to generate arguments for operation add column: \n" + 
     log_f.close()

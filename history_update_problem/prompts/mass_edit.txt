@@ -1,0 +1,34 @@
+To answer the question, we can first use mass_edit() to replace old cell values with new values.
+
+The required arguments for mass_edit() include: edits. Example edits: [{'from': ['foo'], 'to': 'bar'}, {...}], a list of dictionaries
+are defined to replace the old values in 'from' with new value in 'to'.
+
+/*
+col : LoanAmount | City     | State  | Zip 
+row 1 : 30333    | Hon      | HI     |96814
+row 2 : 149900   | HONOLULU | HI     | 96814 
+row 3 : 148100   | Honolulu | HI     | 96814
+*/
+Purpose: Return how many cities are in the table.
+Explanation: Mispellings and different formats of data need to be revised. 
+Therefore, the answer is: mass_edit(column="City", edits=[{'from': ['Hon', 'HONOLULU'], 'to': 'Honolulu'}]). The value: Honolulu | Honolulu | Honolulu
+
+/*
+col : id | neighbourhood      | room_type  | price 
+row 1 : 46154    | OHare      | Entire home/apt     | 65
+row 2 : 6715     | OHARE      | Entire home/apt     | 255 
+row 3 : 228273   | O?Hare     | Private room        | 109
+*/
+Purpose: Return how many rooms are located near OHare.
+Explanation: weird characters and different formats of data value: OHare need to be revised. 
+Therefore, the answer is: mass_edit(column="neighbourhood", edits=[{'from': ['OHAER', 'O?HARE'], 'to': 'OHare'}]). The value: OHare | OHare | OHare
+
+/*
+col : Name               | Area of Research                    | H-index
+row 1 : Jinde Cao        | Complex networks/neural networks/multi-agent systems - engineering stability - dynamics and control - time-delay systems   | 128
+row 2 : Jin Li  李进      | Trust and Security in Artificial Intelligence/Computating and Storage in Cloud Computing/Blockchain                        | 56 
+row 3 : Zhu Han          | Game Theory/Wireless Networking/Security/Data Science/Smart Grid       | 114
+*/
+Purpose: Return researcher's name who has the most H-index.
+Explanation: repair cell values in column name, such as encoding issues. 
+Therefore, the answer is: mass_edit(column="Name", edits=[{'from': ['Jin Li  李进'], 'to': 'Jin Li'}]). The value: Jinde Cao | Jin Li | Zhu Han 

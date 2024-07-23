@@ -1,6 +1,6 @@
 To answer the question, we can first use add_column() to add more columns by applying transformations.
 
-The required arguments for add_column() include: column, new_column, expression. With expression defined, the new column could be based on copying pasting the original value from the base column, or using transformation to process and 
+The required arguments for add_column() include: new_column, expression. With expression defined, the new column could be based on copying pasting the original value from the base column, or using transformation to process and 
 append values to new column.
 
 /*
