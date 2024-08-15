@@ -293,13 +293,14 @@ def main():
     "core/column-removal": remove_column
     }
     project_id = 2681949500112
-    res = get_operations(project_id)
-    ops = []
-    for r in res:
-        ops.append(r['op'])
+    # res = get_operations(project_id)
+    # ops = []
+    # for r in res:
+    #     ops.append(r['op'])
 
-    functions_list = [map_ops_func[operation].__name__ for operation in ops]
-    print(functions_list)
+    # functions_list = [map_ops_func[operation].__name__ for operation in ops]
+    # print(functions_list)
+    # reorder_rows(project_id, sort_by='id')
 
     # add_column(project_id, "event", "event_cleaned", expression="jython:res=cells['event'].value + ',' + cells['venue'].value\nreturn res")
 
@@ -307,6 +308,7 @@ def main():
     # remove_column(project_id, "id")
     # res = export_rows(project_id=2681949500112)
     # text_transform(project_id, "id", expression="return int(value)")
+    text_transform(project_id, "id", expression="jython:value = value + 1\nreturn value")
     # c=0
     # for row in res:
     #     c+=1

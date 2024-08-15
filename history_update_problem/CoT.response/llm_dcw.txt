@@ -1,0 +1,9 @@
+Falseevent`text_transform````
+jython:
+import re
+pattern = re.compile(r'BREAKFAST|LUNCH|DINNER')
+match = pattern.search(value)
+if match:
+    value = match.group(0).upper()
+return value
+```Falseevent
