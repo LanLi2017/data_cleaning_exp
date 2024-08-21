@@ -255,10 +255,34 @@ def extract_exp(content):
     match = re.search(r'```(.*?)```', content, re.DOTALL)
     if match:
         code_block = match.group(1).strip()
+        code_block = code_block.replace('; ', '\n')
         return code_block
     else:
         print("No code block found.")
         return False
+
+
+def diff_check(func_name, old_df, new_df, target_col):
+    """This function is using the diff of applied ops as a context to inspire
+        LLMs to generate next operation"""
+    """Qs: which kind of diff refer to good cleaning operation?"""
+    # return:
+    # column-level diff: {column-schema: }
+    # cell-level diff: 
+    if func_name=='text_transform':
+         differences = {}
+         len_df = len(new_df)
+         assert len(old_df) == len(new_df)
+
+         for i in range(len_df):
+            old_value = old_df.iloc[i][target_col]
+            new_value = new_df.iloc[i][target_col]
+            if old_value != new_value:
+                differences[i] = {old_value: new_value}
+        
+         prompt_changes = f"""The changes resulted by text_transform: a dictionary of pairs of old value and new value: {differences}"""
+         return prompt_changes
+
 
 def generate(prompt, context, log_f, temp=0):
     """
@@ -316,6 +340,24 @@ if __name__ == "__main__":
             no inconsistencies (no violations of the data quality rules).
             Otherwise, Return False.
              """
+    __ev_op = """
+            Evaluation Instruction: 
+            This instruction is to teach you how to evaluate the performance of applied function: whether 
+            the function correctly transforms the data.
+            Checking the changes (dictionary type, every key-value pair represent: {old value: new value}) by different functions
+            in different ways: 
+            For text transform, the performance is good if new values are more consistent: same format, same semantics, less missing values,
+            more correct spellings. Conversely, this function will decrease the data quality and should be reverted.   
+            """
+    __op = __ev_op +\
+            """
+            Return True or False ONLY. NO EXPLANATIONS.
+            Since you have selected one data cleaning function and generated arguments to transform the data at this step.
+            Provided descriptions and examples learned for this function, and actual changes caused by this operation,  
+            please refer to Evaluation Instruction to check whether it is correctly applied on the dataset. The answer is important for it reflect the quality 
+            of the function. You CAN ONLY return True if the changes strongly show that new values are better than the old values.
+            Otherwise, Return False.
+            """
     # Compare with using example in and out
     # __eod_exp = """ 
             # Return True or False ONLY. NO EXPLANATIONS.
@@ -375,7 +417,7 @@ if __name__ == "__main__":
         print(sel_col)
 
         # TASK II: select operations 
-        prompt_sel_ops = "TASK II: Learn available python functions to process data in class RefineProject:" + prep_learning
+        prompt_sel_ops = "TASK II: Step by step, learn available python functions to process data in class RefineProject:" + prep_learning
         ops = get_operations(project_id)
         op_list = [dict['op'] for dict in ops]
         functions_list = [map_ops_func[operation].__name__ for operation in op_list]
@@ -407,7 +449,7 @@ if __name__ == "__main__":
         # prompt_sel_args += f"Sample first 30 rows from the Intermediate Table: {gen_table_str(df)} \n"
         with open(f'prompts/{sel_op}.txt', 'r') as f1:
             sel_args_learn = f1.read()
-        prompt_sel_args += f"""TASK III: Learn proper arguments based on intermediate table and data cleaning purpose:
+        prompt_sel_args += f"""TASK III: Step by step, learn proper arguments based on intermediate table and data cleaning purpose:
                                 {sel_args_learn}"""
         prompt_exp_lr = f"""
                         You are a professional python developer and can write a function to transform the data in proper
@@ -460,9 +502,8 @@ if __name__ == "__main__":
                 print('regenerate....')
                 context, exp = generate(prompt_sel_args, context, log_f)
                 format_exp = extract_exp(exp)
-            print('end')
-            print(format_exp)
-            sel_args = {'column': sel_col, 'expression': f"jython:{format_exp}"}
+                print('end')
+            sel_args = {'column': sel_col, 'expression': f"{format_exp}"}
             text_transform(project_id, **sel_args)
         elif sel_op == 'mass_edit':
             prompt_sel_args += f"""
@@ -493,16 +534,30 @@ if __name__ == "__main__":
         with open("prompts/full_chain_demo.txt", 'r')as f2:
             full_chain_learn = f2.read()
         prompt_full_chain = "Learn when to generate {{True}} for eod_flag and end the data cleaning operations generation:\n" + full_chain_learn
+        
         # Re-execute intermediate table
-        df = export_intermediate_tb(project_id)
+        cur_df = export_intermediate_tb(project_id)
+        prompt_init_prov = f""" Understanding how the selected operation and arguments perform on the dataset is important
+                            for we will understand how the changes applied by the operation and whether this operation improve the
+                            data quality to meet cleaning objectives. 
+                            """
+        changes = diff_check(sel_op, df, cur_df, sel_col)
+        print(f"*********{changes}********")
+        prompt_changes = prompt_init_prov + changes\
+                         + sel_args_learn + __op
+        # EOD Flag I: Does the selected operation perform correctly on the dataset?
+        context, eod_flag1 = generate(prompt_changes, [], log_f)
+        print(f"LLMs believe the operation is correctly applied: {eod_flag1}")
+
         # TASK V:
         # Keep passing intermediate table and data cleaning objective, until eod_flag is True. End the iteration.
-        iter_prompt = prompt_full_chain + dc_obj + f""" intermediate table:{df} """\
+        iter_prompt = prompt_full_chain + dc_obj + f""" intermediate table:{cur_df} """\
                       + __eod
                             # + exp_in_out \
    
-        context, eod_flag = generate(iter_prompt, [], log_f)
-        print('======')
+        context, eod_flag2 = generate(iter_prompt, [], log_f)
+        print(f'LLMs believe current table is good enough to address objectives: {eod_flag2}')
+        eod_flag = eod_flag1 and eod_flag2
         print(eod_flag)
 
     # prompt += "Learn how to generate arguments for operation add column: \n" + 
