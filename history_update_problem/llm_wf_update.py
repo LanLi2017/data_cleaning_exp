@@ -12,7 +12,7 @@ import pandas as pd
 from call_or import *
 
 
-model = "llama3"
+model = "llama3" 
 # parser = argparse.ArgumentParser()
 # parser.add_argument("--start", required=True, type=int)
 # parser.add_argument("--end", required=True, type=int)
@@ -264,8 +264,8 @@ def extract_exp(content):
 
 def diff_check(func_name, old_df, new_df, target_col):
     """This function is using the diff of applied ops as a context to inspire
-        LLMs to generate next operation"""
-    """Qs: which kind of diff refer to good cleaning operation?"""
+        LLMs to generate next function"""
+    """Qs: which kind of diff refer to good cleaning function?"""
     # return:
     # column-level diff: {column-schema: }
     # cell-level diff: 
@@ -331,32 +331,72 @@ if __name__ == "__main__":
     # Output: False/True
     __eod = """ 
             Return True or False ONLY. NO EXPLANATIONS.
-            You are an expert in data cleaning and able to choose appropriate operations and arguments to prepare the data in good format
+            You are an expert in data cleaning and able to choose appropriate functions and arguments to prepare the data in good format
             and correct semantics. Available data cleaning functions include split_column (add more columns by splitting original composite values), 
             add_column (add new column), text_transform (apply expression to transform data), mass_edit (standardize data by replacing old values with new values), 
             rename_column (give more meaningful column names), remove_column.
-            Return True If NO data cleaning operation is needed on the intermediate table, i.e., the current table can address the {{Data Cleaning Objective}}: 
+            Return True If NO data cleaning function is needed on the intermediate table, i.e., the current table can address the {{Data Cleaning Objective}}: 
             data values from the target column are accurate (no mispelling or outliers) and complete (less missing values), no duplicates, 
             no inconsistencies (no violations of the data quality rules).
             Otherwise, Return False.
              """
-    __ev_op = """
-            Evaluation Instruction: 
-            This instruction is to teach you how to evaluate the performance of applied function: whether 
+    # TODO: ...give specific function failed example for evaluation check 
+    __failed_op = """
+        Data input:
+        /*
+        col : code | county | former province | area (km2) | population; census 2009 | capital
+        row 1 : 1 | mombasA | coast | 212.5 | 939,370 | mombasa (city)
+        row 2 : 2 | Kwale | coast | 8,270.3 | 649,931 | kwale
+        row 3 : 3 | KILIFI| coast | 12,245.9 | 1,109,735 | kilifi
+        */
+        Purpose: Figure out how many counties are recorded in total.
+        Rationale: cell values in target column county are in different formats required to be normalized.
+       
+        Failed Example I: Parsing Error
+        ```
+        def text_transform(column, expression):
+            if column == "county":
+                return eval(expression.replace("value", f"row['{column}']")).upper()
+        ```
+        Failed Reason: Operation structure does not follow required format. 
+        (1).If only other auxilary functions are required, there is no need to start with def text_transform() again, write the function directly.
+        (2). use arguments "value" to represent cell values in target column county. 
+        (3). expression cannot be recognized.
+        
+        Failed Example II: Inappropriate Conversion
+        ``` "jython: return int(value)" ```
+        Failed Reason: For expression:"jython: return int(value)", it tries to convert the string type value in column county 
+        to integer, which does not make sense. 
+        
+        Failed Example III: Wrong regular expression
+        ```
+        import re  
+        pattern = re.compile(r'^\d+')
+        match = pattern.match(value)
+        if match:
+            value = match.group(0)
+            return int(value)   
+        ```
+        Failed Reason: For pattern generated in expression:"pattern = re.compile(r'^\d+')", it failed to capture the correct pattern in column county.
+        Therefore, this operation will not be executable to transform the data. 
+
+        """
+    __ev_op = f"""
+            Evaluation Instruction: This instruction is to teach you how to evaluate the performance of applied function: whether 
             the function correctly transforms the data.
-            Checking the changes (dictionary type, every key-value pair represent: {old value: new value}) by different functions
+            Checking the changes (dictionary type, every key-value pair represent:old value: new value) by different functions
             in different ways: 
             For text transform, the performance is good if new values are more consistent: same format, same semantics, less missing values,
-            more correct spellings. Conversely, this function will decrease the data quality and should be reverted.   
+            more correct spellings. Conversely, this function will decrease the data quality and should be reverted. Failed applied function examples
+            can be found: {__failed_op}.
             """
     __op = __ev_op +\
             """
             Return True or False ONLY. NO EXPLANATIONS.
             Since you have selected one data cleaning function and generated arguments to transform the data at this step.
-            Provided descriptions and examples learned for this function, and actual changes caused by this operation,  
-            please refer to Evaluation Instruction to check whether it is correctly applied on the dataset. The answer is important for it reflect the quality 
-            of the function. You CAN ONLY return True if the changes strongly show that new values are better than the old values.
-            Otherwise, Return False.
+            Provided actual changes caused by this function,please refer to Failed examples to check whether it is correctly applied on the dataset. 
+            The answer is important and you should be **strict** with the changes by function. 
+            You CAN ONLY return True if the changes strongly show that new values are better than the old values.Otherwise, Return False.
             """
     # Compare with using example in and out
     # __eod_exp = """ 
@@ -398,7 +438,6 @@ if __name__ == "__main__":
         df = export_intermediate_tb(project_id)
         av_cols = df.columns.to_list()
 
-
         # 1. LLM predict next operation: five op-demo and chain-of ops 
         # TASK I: select target column(s)
         with open("prompts/f_select_column.txt", 'r')as f:
@@ -433,19 +472,19 @@ if __name__ == "__main__":
         
         func_pool = ["split_column", "add_column", "text_transform", "mass_edit", "rename_column", "remove_column"]
         context, sel_op = generate(prompt_sel_ops, context, log_f)
-        print(f"selected operation is {sel_op}")
+        print(f"selected function is {sel_op}")
         sel_op = sel_op.strip('`')
         
         while sel_op not in func_pool:
-            prompt_regen = f"""The selected operation is not found in {functions_list}. Please regenerate function name for TASK II."""
+            prompt_regen = f"""The selected function is not found in {functions_list}. Please regenerate function name for TASK II."""
             context, sel_op = generate(prompt_regen, context, log_f)
             sel_op = sel_op.strip('`')
 
-        # TASK III: Learn operation arguments (share the same context with sel_op)
+        # TASK III: Learn function arguments (share the same context with sel_op)
         args = get_function_arguments('call_or.py', sel_op)
         args.remove('project_id')  # No need to predict project_id
         args.remove('column')
-        prompt_sel_args = f"""Next predicted operation is {sel_op}"""
+        prompt_sel_args = f"""Next predicted function is {sel_op}"""
         # prompt_sel_args += f"Sample first 30 rows from the Intermediate Table: {gen_table_str(df)} \n"
         with open(f'prompts/{sel_op}.txt', 'r') as f1:
             sel_args_learn = f1.read()
@@ -533,21 +572,25 @@ if __name__ == "__main__":
        
         with open("prompts/full_chain_demo.txt", 'r')as f2:
             full_chain_learn = f2.read()
-        prompt_full_chain = "Learn when to generate {{True}} for eod_flag and end the data cleaning operations generation:\n" + full_chain_learn
+        prompt_full_chain = "Learn when to generate {{True}} for eod_flag and end the data cleaning functions generation:\n" + full_chain_learn
         
         # Re-execute intermediate table
         cur_df = export_intermediate_tb(project_id)
-        prompt_init_prov = f""" Understanding how the selected operation and arguments perform on the dataset is important
-                            for we will understand how the changes applied by the operation and whether this operation improve the
+        prompt_init_prov = f""" Understanding how the selected function and arguments perform on the dataset is important
+                            for we will understand how the changes applied by the function and whether this function improve the
                             data quality to meet cleaning objectives. 
                             """
         changes = diff_check(sel_op, df, cur_df, sel_col)
+        # Modify I: if number of changes==0: return False
         print(f"*********{changes}********")
-        prompt_changes = prompt_init_prov + changes\
-                         + sel_args_learn + __op
-        # EOD Flag I: Does the selected operation perform correctly on the dataset?
+
+        prompt_changes = prompt_init_prov + changes + __op
+        # delete sel_args_learn
+        # EOD Flag I: Does the selected function perform correctly on the dataset?
         context, eod_flag1 = generate(prompt_changes, [], log_f)
-        print(f"LLMs believe the operation is correctly applied: {eod_flag1}")
+        print(f"LLMs believe the function is correctly applied: {eod_flag1}")
+        
+        # TODO: if False, revert function re-generate 
 
         # TASK V:
         # Keep passing intermediate table and data cleaning objective, until eod_flag is True. End the iteration.
@@ -560,5 +603,5 @@ if __name__ == "__main__":
         eod_flag = eod_flag1 and eod_flag2
         print(eod_flag)
 
-    # prompt += "Learn how to generate arguments for operation add column: \n" + 
+    # prompt += "Learn how to generate arguments for function add column: \n" + 
     log_f.close()
