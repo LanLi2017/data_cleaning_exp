@@ -12,7 +12,10 @@ import pandas as pd
 from call_or import *
 
 
-model = "llama3" 
+# model = "llama3.1:8b-instruct-fp16" 
+model = "llama3.1"
+# model = 'stablelm-zephyr' 
+
 # parser = argparse.ArgumentParser()
 # parser.add_argument("--start", required=True, type=int)
 # parser.add_argument("--end", required=True, type=int)
@@ -330,15 +333,20 @@ if __name__ == "__main__":
     # Input:intermediate table; Example output format
     # Output: False/True
     __eod = """ 
-            Return True or False ONLY. NO EXPLANATIONS.
-            You are an expert in data cleaning and able to choose appropriate functions and arguments to prepare the data in good format
-            and correct semantics. Available data cleaning functions include split_column (add more columns by splitting original composite values), 
-            add_column (add new column), text_transform (apply expression to transform data), mass_edit (standardize data by replacing old values with new values), 
-            rename_column (give more meaningful column names), remove_column.
-            Return True If NO data cleaning function is needed on the intermediate table, i.e., the current table can address the {{Data Cleaning Objective}}: 
-            data values from the target column are accurate (no mispelling or outliers) and complete (less missing values), no duplicates, 
-            no inconsistencies (no violations of the data quality rules).
-            Otherwise, Return False.
+            You are an expert in data cleaning theory and practices, you are able to recognize whether the data is 
+            clean (high quality) enough for the provided objectives:
+            The pipeline of evalauting whether a dataset is of good quality: 
+            (1). Understand the data cleaning objectives that this dataset is instended to address. Ensure that the dataset is relevant and
+            provides sufficient information to answer it.
+            (2). Profiling the dataset, check dataset from column schema level and instance level;
+            "what are the columns? Whether the column names are meaningful or not?" 
+            "what are the distributions of data instances?" "are they clearly represented?"
+            (3). Assess the profiling results from four dimensions as following: 
+            - **accuracy**: Whether the dataset is free from obvious errors, inconsistencies, or biases
+            - **relavance**: Whether it includes essential variables (target columns) to address the objectives.
+            - **completeness**: Whether it has a reasonable sample size and contains enough data instances (not too many missing values)
+            - **duplicates**: Whether the spellings are standardized, no same semantics but different representations exist
+            Return "False" as long as you are suspecious or unsure about the assessment results. No EXPLANATIONS.
              """
     # TODO: ...give specific function failed example for evaluation check 
     __failed_op = """
@@ -455,8 +463,13 @@ if __name__ == "__main__":
             context, sel_col = generate(prompt_regen, context, log_f)
         print(sel_col)
 
-        # TASK II: select operations 
-        prompt_sel_ops = "TASK II: Step by step, learn available python functions to process data in class RefineProject:" + prep_learning
+        # TASK II: select operations
+         
+        prompt_sel_ops = """You are an expert in data cleaning and able to choose appropriate functions and arguments to prepare the data in good format
+                and correct semantics. Available data cleaning functions include split_column (add more columns by splitting original composite values), 
+                add_column (add new column), text_transform (apply expression to transform data), mass_edit (standardize data by replacing old values with new values), 
+                rename_column (give more meaningful column names), remove_column."""+\
+                "TASK II: Step by step, learn available python functions to process data in class RefineProject:" + prep_learning
         ops = get_operations(project_id)
         op_list = [dict['op'] for dict in ops]
         functions_list = [map_ops_func[operation].__name__ for operation in op_list]
