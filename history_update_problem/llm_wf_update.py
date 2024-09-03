@@ -74,7 +74,6 @@ class RefineProject:
                                     'expression': expression,
                                     'columnInsertIndex': column_insert_index,
                                     'onError': on_error})
-        self.get_models()
         return response
 
     def split_column(project_id,column,separator):
@@ -91,7 +90,6 @@ class RefineProject:
                                     'guessCellType': guess_cell_type,
                                     'removeOriginalColumn': remove_original_column,
                                 })
-        self.get_models()
         return response
 
     def rename_column(project_id, column, new_column):
@@ -103,7 +101,6 @@ class RefineProject:
                                     'oldColumnName': column,
                                     'newColumnName': new_column,
                                 })
-        self.get_models()
         return response
         
     def remove_column(project_id, column):
@@ -111,7 +108,6 @@ class RefineProject:
         Example: remove_column(project_id, 'currency')
         Explain: most of the cells in column {{currency}} are NA, so we remove this column.'''
         response = self.do_json('remove-column', {'columnName': column})
-        self.get_models()
         return response
     
     def reorder_rows(project_id, sort_by=None):
@@ -457,11 +453,14 @@ if __name__ == "__main__":
         prompt_sel_col += f"""Available columns for chosen: {av_cols}.
                              TASK I: Step by step, Return one relevant column name(string) based on {{Data cleaning objective}} ONLY. NO EXPLANATIONS.
                              Example Return: column 1 """
+        # prompt_sel_col += f"""Available columns for chosen: {av_cols}.
+        #                      TASK I: Step by step, Return one relevant column name(string) based on {{Data cleaning objective}} ONLY.
+        #                      Example Return: column 1 """
         context, sel_col = generate(prompt_sel_col, context, log_f)
+        print(sel_col)
         while sel_col not in av_cols:
             prompt_regen = f"""The selected columns are not in {av_cols}. Please regenerate column name for TASK I."""
             context, sel_col = generate(prompt_regen, context, log_f)
-        print(sel_col)
 
         # TASK II: select operations
          
@@ -478,13 +477,18 @@ if __name__ == "__main__":
         # prompt_sel_ops += f"Sample first 30 rows from the Intermediate Table: {gen_table_str(df)} \n"
         prompt_sel_ops += f"Data values in target column: {gen_col_str(df, sel_col)}"
         prompt_sel_ops += f"Data cleaning purpose: {dc_obj}"
+        # prompt_sel_ops += """
+        #                    Return one selected function name from Functions Pool of RefineProject ONLY. NO EXPLANATIONS.
+        #                    Functions pool: split_column, add_column, text_transform, mass_edit, rename_column, remove_column.
+        #                    This task is to make the data in a good quality that fit for {{Data cleaning purpose}}."""
         prompt_sel_ops += """
-                           Return one selected function name from Functions Pool of RefineProject ONLY. NO EXPLANATIONS.
                            Functions pool: split_column, add_column, text_transform, mass_edit, rename_column, remove_column.
-                           This task is to make the data in a good quality that fit for {{Data cleaning purpose}}."""
+                           Step by step, return ONLY one selected function name from Functions Pool of RefineProject."""
         
         func_pool = ["split_column", "add_column", "text_transform", "mass_edit", "rename_column", "remove_column"]
         context, sel_op = generate(prompt_sel_ops, context, log_f)
+        print(sel_op)
+        break
         print(f"selected function is {sel_op}")
         sel_op = sel_op.strip('`')
         
@@ -492,7 +496,6 @@ if __name__ == "__main__":
             prompt_regen = f"""The selected function is not found in {functions_list}. Please regenerate function name for TASK II."""
             context, sel_op = generate(prompt_regen, context, log_f)
             sel_op = sel_op.strip('`')
-
         # TASK III: Learn function arguments (share the same context with sel_op)
         args = get_function_arguments('call_or.py', sel_op)
         args.remove('project_id')  # No need to predict project_id
